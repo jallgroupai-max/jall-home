@@ -210,7 +210,7 @@ const ChatGPTMembership = ({ membershipEnd, redirectUrl, accessToken }: ChatGPTM
         className="w-full h-11 bg-primary hover:opacity-90 font-bold tracking-wide relative overflow-hidden group box-glow-cyan"
         size="lg"
       >
-         <a href={(redirectUrl || "http://localhost:3001") + (accessToken ? `?token=${accessToken}` : '')} target="_blank" rel="noopener noreferrer">
+         <a href={(redirectUrl || "https://gpt.jall.lat") + (accessToken ? `?token=${accessToken}` : '')} target="_blank" rel="noopener noreferrer">
           {t("dashboard.openChatGPT")}
         </a>
       </Button>
