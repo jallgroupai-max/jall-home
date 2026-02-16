@@ -9,7 +9,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ENVIRONMENT
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,10 +16,10 @@ jobs:
       - name: Deploying via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ vars.SSH_HOST }}
+          username: ${{ vars.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          port: ${{ secrets.SSH_PORT }}
+          port: ${{ vars.SSH_PORT }}
           script: |
             set -e
 
@@ -57,9 +56,9 @@ jobs:
 
             echo "🔧 Configurando variables de entorno (.env)..."
             if [ "$BRANCH" = "main" ]; then
-                echo "${{ secrets.ENV_PROD }}" > .env
+                echo "${{ vars.ENV_PROD }}" > .env
             else
-                echo "${{ secrets.ENV_DEV }}" > .env
+                echo "${{ vars.ENV_DEV }}" > .env
             fi
             
             echo "📦 Instalando dependencias con pnpm..."

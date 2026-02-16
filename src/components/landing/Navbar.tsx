@@ -26,43 +26,45 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl border-b border-border/50">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <span className="text-2xl font-bold text-primary glow-green">
-              Jall AI
+            <span className="text-xl font-semibold tracking-tight text-foreground">
+              Jall<span className="text-primary"> AI</span>
             </span>
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center gap-1">
             <button
               onClick={() => scrollToSection("inicio")}
-              className="text-foreground/80 hover:text-primary transition-colors"
+              className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-all"
             >
               {t("nav.home")}
             </button>
             <button
               onClick={() => scrollToSection("precios")}
-              className="text-foreground/80 hover:text-primary transition-colors"
+              className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-all"
             >
               {t("nav.pricing")}
             </button>
             <button
               onClick={() => scrollToSection("faq")}
-              className="text-foreground/80 hover:text-primary transition-colors"
+              className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-all"
             >
               {t("nav.faq")}
             </button>
             
-            {/* Language Selector - Subtle */}
+            <div className="w-px h-6 bg-border mx-2" />
+
+            {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1.5 text-foreground/60 hover:text-primary transition-colors text-sm">
+                <button className="flex items-center gap-1.5 px-3 py-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-secondary transition-all text-sm">
                   <Globe className="w-4 h-4" />
-                  <span className="uppercase">{language}</span>
+                  <span className="uppercase text-xs font-medium">{language}</span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[120px]">
@@ -82,15 +84,16 @@ const Navbar = () => {
             </DropdownMenu>
 
             <Button
-              variant="outline"
+              variant="ghost"
+              size="sm"
               onClick={() => setLoginOpen(true)}
-              className="border-primary/50 text-foreground hover:bg-primary/10"
+              className="text-muted-foreground hover:text-foreground"
             >
               {t("nav.login")}
             </Button>
             <Button
+              size="sm"
               onClick={() => setRegisterOpen(true)}
-              className="box-glow-green"
             >
               {t("nav.register")}
             </Button>
@@ -100,37 +103,37 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-foreground p-2"
+              className="text-foreground p-2 rounded-lg hover:bg-secondary transition-colors"
             >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
+              {isOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden py-4 space-y-4 animate-fade-in">
+          <div className="md:hidden py-4 space-y-1 animate-fade-in">
             <button
               onClick={() => scrollToSection("inicio")}
-              className="block w-full text-left text-foreground/80 hover:text-primary transition-colors py-2"
+              className="block w-full text-left px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-all text-sm"
             >
               {t("nav.home")}
             </button>
             <button
               onClick={() => scrollToSection("precios")}
-              className="block w-full text-left text-foreground/80 hover:text-primary transition-colors py-2"
+              className="block w-full text-left px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-all text-sm"
             >
               {t("nav.pricing")}
             </button>
             <button
               onClick={() => scrollToSection("faq")}
-              className="block w-full text-left text-foreground/80 hover:text-primary transition-colors py-2"
+              className="block w-full text-left px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-all text-sm"
             >
               {t("nav.faq")}
             </button>
             
             {/* Mobile Language Selector */}
-            <div className="flex items-center gap-2 py-2">
+            <div className="flex items-center gap-2 px-4 py-2.5">
               <Globe className="w-4 h-4 text-muted-foreground" />
               <button
                 onClick={() => setLanguage("es")}
@@ -138,7 +141,7 @@ const Navbar = () => {
               >
                 ES
               </button>
-              <span className="text-muted-foreground">|</span>
+              <span className="text-border">|</span>
               <button
                 onClick={() => setLanguage("en")}
                 className={`text-sm ${language === "en" ? "text-primary font-medium" : "text-muted-foreground"}`}
@@ -147,25 +150,23 @@ const Navbar = () => {
               </button>
             </div>
 
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsOpen(false);
-                setLoginOpen(true);
-              }}
-              className="w-full border-primary/50 text-foreground hover:bg-primary/10 mb-2"
-            >
-              {t("nav.login")}
-            </Button>
-            <Button
-              onClick={() => {
-                setIsOpen(false);
-                setRegisterOpen(true);
-              }}
-              className="w-full box-glow-green"
-            >
-              {t("nav.register")}
-            </Button>
+            <div className="pt-3 space-y-2 border-t border-border">
+              <Button
+                variant="ghost"
+                onClick={() => { setIsOpen(false); setLoginOpen(true); }}
+                className="w-full justify-start text-muted-foreground"
+                size="sm"
+              >
+                {t("nav.login")}
+              </Button>
+              <Button
+                onClick={() => { setIsOpen(false); setRegisterOpen(true); }}
+                className="w-full"
+                size="sm"
+              >
+                {t("nav.register")}
+              </Button>
+            </div>
           </div>
         )}
       </div>

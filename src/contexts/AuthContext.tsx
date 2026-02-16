@@ -11,6 +11,7 @@ interface AuthContextType {
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  setAuthData: (user: User, token: string) => void;
   isLoggedIn: boolean;
   loading: boolean;
 }
@@ -55,17 +56,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await authService.signIn({ email, password });
       
-      setUser({ ...response.user, points: 0 });
-      setToken(response.access.accessToken);
-      
-      localStorage.setItem("jallai_token", response.access.accessToken);
-      localStorage.setItem("jallai_user", JSON.stringify(response.user));
-      localStorage.setItem("token", response.access.accessToken); // For services
-      
-      toast({
-        title: "¡Bienvenido!",
-        description: `Hola ${response.user.name || response.user.email}`,
-      });
+      // Only proceed if we have user and access data (not OTP flow)
+      if (response.user && response.access) {
+        setUser({ ...response.user, points: 0 });
+        setToken(response.access.accessToken);
+        
+        localStorage.setItem("jallai_token", response.access.accessToken);
+        localStorage.setItem("jallai_user", JSON.stringify(response.user));
+        localStorage.setItem("token", response.access.accessToken); // For services
+        
+        toast({
+          title: "¡Bienvenido!",
+          description: `Hola ${response.user.name || response.user.email}`,
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error de autenticación",
@@ -97,8 +101,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const setAuthData = (userData: User, authToken: string) => {
+    setUser({ ...userData, points: 0 });
+    setToken(authToken);
+    
+    localStorage.setItem("jallai_token", authToken);
+    localStorage.setItem("jallai_user", JSON.stringify(userData));
+    localStorage.setItem("token", authToken); // For services
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoggedIn: !!user, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, setAuthData, isLoggedIn: !!user, loading }}>
       {children}
     </AuthContext.Provider>
   );
