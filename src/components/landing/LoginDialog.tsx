@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import OtpDialog from "./OtpDialog";
+import { authService } from "@/lib/auth.service";
 
 interface LoginDialogProps {
   open: boolean;
@@ -30,8 +32,10 @@ const LoginDialog = ({ open, onOpenChange, onSwitchToRegister }: LoginDialogProp
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [maskedEmail, setMaskedEmail] = useState("");
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, setAuthData } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
@@ -50,13 +54,34 @@ const LoginDialog = ({ open, onOpenChange, onSwitchToRegister }: LoginDialogProp
     setIsLoading(true);
     
     try {
-      await login(email, password);
-      toast({
-        title: t("login.success"),
-        description: t("login.successDesc"),
-      });
-      onOpenChange(false);
-      navigate("/dashboard");
+      const response = await authService.signIn({ email, password });
+      
+      // OTP DISABLED - Always use normal login flow
+      // Check if we have user and access data
+      if (response.ok && response.access && response.user) {
+        // Normal login - use response data directly
+        setAuthData(response.user, response.access.accessToken);
+        toast({
+          title: "¡Bienvenido!",
+          description: `Hola ${response.user.name || response.user.email}`,
+        });
+        onOpenChange(false);
+        navigate("/dashboard");
+      } else if (response.ok && response.message && !response.access) {
+        // OTP would be required, but we're skipping it
+        // Show error message instead
+        toast({
+          title: "Verificación pendiente",
+          description: "Tu cuenta requiere verificación. Contacta al administrador.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error inesperado",
+          description: "Por favor, intenta nuevamente",
+          variant: "destructive",
+        });
+      }
     } catch (error: any) {
       toast({
         title: t("login.error.invalid"),
@@ -68,57 +93,94 @@ const LoginDialog = ({ open, onOpenChange, onSwitchToRegister }: LoginDialogProp
     }
   };
 
+  const handleOtpVerifySuccess = async (accessToken: string, expiresAt: string) => {
+    try {
+      // Get user profile with the token
+      const user = await authService.getProfile(accessToken);
+      
+      // Set auth data in context
+      if (setAuthData) {
+        setAuthData(user, accessToken);
+      }
+      
+      toast({
+        title: "¡Bienvenido!",
+        description: `Hola ${user.name || user.email}`,
+      });
+      
+      onOpenChange(false);
+      setShowOtpDialog(false);
+      navigate("/dashboard");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo obtener la información del usuario",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-2xl text-center">{t("login.title")}</DialogTitle>
-          <DialogDescription className="text-center">
-            {t("login.subtitle")}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="login-email">{t("login.email")}</Label>
-            <Input
-              id="login-email"
-              type="email"
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-secondary"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="login-password">{t("login.password")}</Label>
-            <Input
-              id="login-password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="bg-secondary"
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? t("login.loading") : t("login.submit")}
-          </Button>
-          <p className="text-center text-sm text-muted-foreground">
-            {t("login.noAccount")}{" "}
-            <button
-              type="button"
-              onClick={() => {
-                onOpenChange(false);
-                onSwitchToRegister();
-              }}
-              className="text-primary hover:underline"
-            >
-              {t("login.registerHere")}
-            </button>
-          </p>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center">{t("login.title")}</DialogTitle>
+            <DialogDescription className="text-center">
+              {t("login.subtitle")}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="login-email">{t("login.email")}</Label>
+              <Input
+                id="login-email"
+                type="email"
+                placeholder="tu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-secondary"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="login-password">{t("login.password")}</Label>
+              <Input
+                id="login-password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-secondary"
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? t("login.loading") : t("login.submit")}
+            </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              {t("login.noAccount")}{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenChange(false);
+                  onSwitchToRegister();
+                }}
+                className="text-primary hover:underline"
+              >
+                {t("login.registerHere")}
+              </button>
+            </p>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      <OtpDialog
+        open={showOtpDialog}
+        onOpenChange={setShowOtpDialog}
+        email={email}
+        maskedEmail={maskedEmail}
+        onVerifySuccess={handleOtpVerifySuccess}
+      />
+    </>
   );
 };
 

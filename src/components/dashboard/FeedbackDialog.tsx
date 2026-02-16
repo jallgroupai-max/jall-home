@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, ArrowRight, CheckCircle, Lightbulb, MessageSquare, Wrench } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { feedbackService, FeedbackType as ApiFeedbackType, FeedbackCategory, CreateFeedbackDto } from "@/lib/feedback.service";
 
 interface FeedbackDialogProps {
   open: boolean;
@@ -15,19 +17,21 @@ interface FeedbackDialogProps {
 }
 
 type Step = "type" | "questions" | "tool" | "thanks";
-type FeedbackType = "feedback" | "tool";
+type DialogFeedbackType = "feedback" | "tool"; // Renamed to avoid collision
 
 const FeedbackDialog = ({ open, onOpenChange }: FeedbackDialogProps) => {
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { token } = useAuth();
   const [step, setStep] = useState<Step>("type");
-  const [feedbackType, setFeedbackType] = useState<FeedbackType | "">("");
+  const [feedbackType, setFeedbackType] = useState<DialogFeedbackType | "">("");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [additionalComments, setAdditionalComments] = useState("");
   const [toolName, setToolName] = useState("");
   const [toolReason, setToolReason] = useState("");
 
+  // ... (leanStartupQuestions array remains same) ...
   const leanStartupQuestions = [
     {
       id: "frequency",
@@ -86,14 +90,49 @@ const FeedbackDialog = ({ open, onOpenChange }: FeedbackDialogProps) => {
     onOpenChange(isOpen);
   };
 
-  const handleSubmit = () => {
-    toast({
-      title: t("feedback.toast"),
-      description: t("feedback.toastDesc"),
-    });
-    setStep("thanks");
+  const handleSubmit = async () => {
+    if (!token) return;
+
+    try {
+      let data: CreateFeedbackDto;
+
+      if (feedbackType === "tool") {
+        data = {
+          type: ApiFeedbackType.SUGGESTION,
+          category: FeedbackCategory.TOOL,
+          message: `Tool: ${toolName}. Reason: ${toolReason}`,
+        };
+      } else {
+        // Feedback
+        const formattedMessage = Object.entries(answers)
+          .map(([qId, answer]) => `${qId}: ${t(leanStartupQuestions.find(q => q.id === qId)?.options.find(o => o.value === answer)?.labelKey || answer)}`)
+          .join('\n');
+        
+        data = {
+          type: ApiFeedbackType.OTHER,
+          category: FeedbackCategory.DASHBOARD,
+          message: `${formattedMessage}\n\nAdditional Comments: ${additionalComments}`,
+        };
+      }
+
+      await feedbackService.create(data, token);
+
+      toast({
+        title: t("feedback.toast"),
+        description: t("feedback.toastDesc"),
+      });
+      setStep("thanks");
+    } catch (error) {
+       console.error(error);
+       toast({
+        title: "Error",
+        description: "Failed to send feedback",
+        variant: "destructive",
+      });
+    }
   };
 
+  // ... (currentQuestion logic)
   const currentQuestion = leanStartupQuestions[currentQuestionIndex];
 
   const goNext = () => {
@@ -156,7 +195,7 @@ const FeedbackDialog = ({ open, onOpenChange }: FeedbackDialogProps) => {
           {step === "type" && (
             <RadioGroup 
               value={feedbackType} 
-              onValueChange={(value) => setFeedbackType(value as FeedbackType)} 
+              onValueChange={(value) => setFeedbackType(value as DialogFeedbackType)} 
               className="space-y-3"
             >
               <Label

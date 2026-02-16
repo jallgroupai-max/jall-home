@@ -16,11 +16,12 @@ export interface SignInRequest {
 
 export interface SignInResponse {
     ok: boolean;
-    user: User;
-    access: {
+    user?: User;
+    access?: {
         accessToken: string;
         expiresAt: string;
     };
+    message?: string; // Masked email when OTP is required
 }
 
 export const authService = {

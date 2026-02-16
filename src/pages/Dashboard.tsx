@@ -1,9 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
-import { Coins, Home, Sparkles, Play, Mic, Menu, X, LogOut, Plus, MessageSquarePlus, Clock, HelpCircle, Wallet } from "lucide-react";
+import { Coins, Home, Sparkles, Play, Mic, Menu, X, Plus, MessageSquarePlus, Clock, HelpCircle, Wallet, Sun, Moon, FileText } from "lucide-react";
 import {
   HoverCard,
   HoverCardContent,
@@ -20,6 +22,7 @@ import FeedbackDialog from "@/components/dashboard/FeedbackDialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/lib/api";
 import { walletsService } from "@/lib/wallets.service";
+import { paymentsService } from "@/lib/payments.service";
 
 type ToolType = "chatgpt" | "elevenlabs" | "aiultra";
 
@@ -115,7 +118,7 @@ const ToolHelpButton = ({ tool }: { tool: ToolType }) => {
       </PopoverTrigger>
       <PopoverContent className="w-80" align="center">
         <div className="space-y-3">
-          <h4 className="font-semibold text-white">{titles[tool]}</h4>
+          <h4 className="font-semibold text-foreground">{titles[tool]}</h4>
           <ul className="space-y-2">
             {features[tool].map((feature, index) => (
               <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
@@ -186,7 +189,7 @@ const ChatGPTMembership = ({ membershipEnd, redirectUrl, accessToken }: ChatGPTM
         </h2>
         <div className="flex justify-center">
           <div className="inline-block px-4 py-2 bg-accent/20 rounded-full">
-            <span className="text-wwhite font-bold">{t("dashboard.membershipActive")}</span>
+            <span className="text-purple-900 dark:text-white font-bold">{t("dashboard.membershipActive")}</span>
           </div>
         </div>
       </div>
@@ -198,15 +201,16 @@ const ChatGPTMembership = ({ membershipEnd, redirectUrl, accessToken }: ChatGPTM
         <span className="font-mono font-bold text-foreground">{timeRemaining}</span>
       </div>
       
-      <p className="text-muted-foreground">
-        {t("dashboard.fullAccess")}
-      </p>
-      <Button
-        asChild
-        className="box-glow-cyan"
+      <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-lg text-sm text-green-500 animate-fade-in relative overflow-hidden group">
+        <div className="absolute inset-0 bg-green-500/5 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+        <p className="relative z-10 font-medium">✨ {t("dashboard.fullAccess")}</p>
+      </div>
+
+      <Button 
+        className="w-full h-11 bg-primary hover:opacity-90 font-bold tracking-wide relative overflow-hidden group box-glow-cyan"
         size="lg"
       >
-        <a href={(redirectUrl || "https://gpt.jall.lat/") + (accessToken ? `?token=${accessToken}` : '')} target="_blank" rel="noopener noreferrer">
+         <a href={(redirectUrl || "http://localhost:3001") + (accessToken ? `?token=${accessToken}` : '')} target="_blank" rel="noopener noreferrer">
           {t("dashboard.openChatGPT")}
         </a>
       </Button>
@@ -215,7 +219,7 @@ const ChatGPTMembership = ({ membershipEnd, redirectUrl, accessToken }: ChatGPTM
 };
 
 const Dashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, token, logout, loading } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -227,21 +231,15 @@ const Dashboard = () => {
   const [loadingTool, setLoadingTool] = useState(false);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [userAccounts, setUserAccounts] = useState<UserAccount[]>([]);
-  const { token } = useAuth();
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    if (user) {
-      fetchWallet();
-      fetchInitialData();
-      const interval = setInterval(() => {
-        fetchWallet();
-        // optionally refresh accounts to check expiry
-        fetchUserAccounts();
-      }, 5000); 
-
-      return () => clearInterval(interval);
+    if (!loading && (!user || !token)) {
+      navigate("/");
     }
-  }, [user, showRechargeDialog]);
+  }, [user, token, loading, navigate]);
+
 
   const fetchInitialData = async () => {
     if (!token) return;
@@ -276,6 +274,32 @@ const Dashboard = () => {
       console.error("Failed to fetch wallet", error);
     }
   };
+
+  const fetchPendingOrders = async () => {
+    if (!token || !user?.id) return;
+    try {
+        const count = await paymentsService.getPendingCount(user.id, token);
+        setPendingOrdersCount(count);
+    } catch (error) {
+        console.error("Error fetching pending orders:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user && token) {
+      fetchWallet();
+      fetchInitialData();
+      fetchPendingOrders();
+      const interval = setInterval(() => {
+        fetchWallet();
+        // optionally refresh accounts to check expiry
+        fetchUserAccounts();
+        fetchPendingOrders();
+      }, 10000); 
+
+      return () => clearInterval(interval);
+    }
+  }, [user, token, showRechargeDialog]);
 
   const handleActivate = async (tool: ToolType) => {
       if (!user || !token) return;
@@ -371,7 +395,12 @@ const Dashboard = () => {
     // ChatGPT Logic
     if (activeTab === "chatgpt") {
         const chatGPTProvider = providers.find(p => p.typeProvider === 'ChatGPT');
-        const activeAccount = userAccounts.find(ua => ua.active && ua.account?.provider?.typeProvider === 'ChatGPT');
+        
+        // Find the latest active and valid account
+        const activeAccount = userAccounts
+            .filter(ua => ua.active && ua.account?.provider?.typeProvider === 'ChatGPT')
+            .sort((a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime())
+            .find(ua => new Date(ua.expiresAt) > new Date());
 
         // Check if expired logic (though backend handles 'active' status usually)
         const isActive = activeAccount && new Date(activeAccount.expiresAt) > new Date();
@@ -436,11 +465,11 @@ const Dashboard = () => {
             </h2>
             <div className="flex justify-center">
               <div className="inline-block px-4 py-2 bg-accent/20 rounded-full">
-                <span className="text-white font-bold">{t("dashboard.comingSoon")}</span>
+                <span className="text-primary font-bold">{t("dashboard.comingSoon")}</span>
               </div>
             </div>
           </div>
-          <p className="text-white">
+          <p className="text-muted-foreground">
             {t("dashboard.elevenLabsDesc")}
           </p>
           <Button
@@ -465,10 +494,10 @@ const Dashboard = () => {
         </h2>
         <div className="flex justify-center">
               <div className="inline-block px-4 py-2 bg-accent/20 rounded-full">
-                <span className="text-white font-bold">{t("dashboard.comingSoon")}</span>
+                <span className="text-primary font-bold">{t("dashboard.comingSoon")}</span>
               </div>
         </div>  
-        <p className="text-white">
+        <p className="text-muted-foreground">
             {t("dashboard.aiultraDesc")}
         </p>
         <Button
@@ -501,8 +530,8 @@ const Dashboard = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                     activeTab === tab.id
-                      ? "bg-white/20 text-primary font-bold"
-                      : "text-white hover:bg-secondary font-bold"
+                      ? "bg-primary/10 text-primary font-bold"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground font-medium"
                   }`}
                 >
                   <tab.icon className="w-4 h-4" />
@@ -515,7 +544,7 @@ const Dashboard = () => {
             <div className="hidden md:flex items-center gap-4">
               <HoverCard openDelay={100} closeDelay={200}>
                 <HoverCardTrigger asChild>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-accent rounded-lg cursor-pointer hover:bg-accent/80 transition-colors">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-accent rounded-lg cursor-pointer hover:bg-accent/90 transition-colors">
                     <Wallet className="w-4 h-4 text-white" />
                     <span className="font-medium text-white">${balance?.toFixed(2) || "0.00"} Saldo</span>
                   </div>
@@ -540,7 +569,16 @@ const Dashboard = () => {
                 <MessageSquarePlus className="w-4 h-4" />
                 {t("dashboard.suggestChanges")}
               </Button>
-              <AccountMenu email={user?.email || ""} onLogout={handleLogout} />
+              
+              <AccountMenu email={user?.email || ""} onLogout={handleLogout} pendingOrdersCount={pendingOrdersCount} />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="text-foreground"
+              >
+                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              </Button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -555,15 +593,26 @@ const Dashboard = () => {
           {/* Mobile Menu */}
           {mobileMenuOpen && (
             <div className="md:hidden py-4 space-y-2 animate-fade-in border-t border-border">
-            <div className="flex items-center justify-between gap-2 px-4 py-2 bg-secondary rounded-lg mb-4">
-              <div className="flex items-center gap-2">
+
+            <div className="flex flex-col gap-2 p-2 bg-secondary rounded-lg mb-4">
+              {/* Wallet Balance */}
+              <div className="flex items-center justify-between px-2">
+                 <div className="flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-white" />
+                    <span className="font-medium text-white">${balance?.toFixed(2) || "0.00"} Saldo</span>
+                 </div>
+                 <Button onClick={handleRecharge} size="sm" variant="ghost" className="h-7 px-2 text-white hover:text-white hover:bg-white/10">
+                    <Plus className="w-4 h-4" />
+                 </Button>
+              </div>
+              
+              {/* Points (optional, keeping basic structure similar to desktop or minimal) */}
+              <div className="flex items-center gap-2 px-2 text-sm text-muted-foreground border-t border-white/10 pt-2">
                 <Coins className="w-4 h-4 text-accent" />
                 <span className="font-medium">{user?.points || 0} {t("dashboard.points")}</span>
               </div>
-              <Button onClick={handleRecharge} size="sm" variant="ghost" className="h-7 px-2">
-                <Plus className="w-4 h-4" />
-              </Button>
             </div>
+
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -581,8 +630,22 @@ const Dashboard = () => {
                   {tab.label}
                 </button>
               ))}
-              <div className="pt-2 border-t border-border">
-                <AccountMenu email={user?.email || ""} onLogout={handleLogout} />
+              <div className="pt-4 mt-2 border-t border-border flex flex-col gap-3">
+                <AccountMenu 
+                    email={user?.email || ""} 
+                    onLogout={handleLogout} 
+                    pendingOrdersCount={pendingOrdersCount}
+                    className="w-full justify-start px-4"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="w-full justify-start gap-2 px-4"
+                >
+                  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  {theme === "dark" ? "Modo Claro" : "Modo Oscuro"}
+                </Button>
               </div>
             </div>
           )}

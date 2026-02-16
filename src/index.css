@@ -2,92 +2,92 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Jall AI Design System - 2025 Palette
-   Deep Space Blue: #0F314F (212 69% 18%) - Fondos, confianza
-   Strong Cyan: #00C4DA (186 100% 43%) - CTAs primarios, innovación
-   Gunmetal Gray: #353E43 (201 11% 24%) - Textos secundarios, sofisticación
-   Electric Purple: #7C3AED (262 83% 58%) - CTAs secundarios, creatividad
+/* Jall AI — Material Design 3 Palette
+   Surface: Dark neutrals with slight blue undertone
+   Primary: Refined Teal (#14B8A6)
+   Secondary: Soft Violet (#A78BFA)
+   Tertiary: Warm Amber (#F59E0B)
 */
 
 @layer base {
   :root {
-    --background: 212 69% 12%;
-    --foreground: 200 20% 95%;
+    --background: 0 0% 100%;
+    --foreground: 222 15% 7%;
 
-    --card: 212 60% 16%;
-    --card-foreground: 200 20% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 15% 7%;
 
-    --popover: 212 60% 16%;
-    --popover-foreground: 200 20% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 15% 7%;
 
-    --primary: 186 100% 43%;
-    --primary-foreground: 212 69% 8%;
+    --primary: 173 50% 32%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 201 11% 24%;
-    --secondary-foreground: 200 20% 95%;
+    --secondary: 210 40% 90%;
+    --secondary-foreground: 222 15% 7%;
 
-    --muted: 201 11% 20%;
-    --muted-foreground: 200 15% 65%;
+    --muted: 210 40% 90%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 262 83% 58%;
+    --accent: 263 50% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 201 11% 28%;
-    --input: 201 11% 28%;
-    --ring: 186 100% 43%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 173 80% 40%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 212 69% 10%;
-    --sidebar-foreground: 200 20% 95%;
-    --sidebar-primary: 186 100% 43%;
-    --sidebar-primary-foreground: 212 69% 8%;
-    --sidebar-accent: 262 83% 58%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 201 11% 28%;
-    --sidebar-ring: 186 100% 43%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 212 69% 12%;
-    --foreground: 200 20% 95%;
+    --background: 222 15% 7%;
+    --foreground: 220 10% 93%;
 
-    --card: 212 60% 16%;
-    --card-foreground: 200 20% 95%;
+    --card: 222 13% 11%;
+    --card-foreground: 220 10% 93%;
 
-    --popover: 212 60% 16%;
-    --popover-foreground: 200 20% 95%;
+    --popover: 222 13% 13%;
+    --popover-foreground: 220 10% 93%;
 
-    --primary: 186 100% 43%;
-    --primary-foreground: 212 69% 8%;
+    --primary: 173 80% 40%;
+    --primary-foreground: 222 15% 7%;
 
-    --secondary: 201 11% 24%;
-    --secondary-foreground: 200 20% 95%;
+    --secondary: 222 10% 16%;
+    --secondary-foreground: 220 10% 85%;
 
-    --muted: 201 11% 20%;
-    --muted-foreground: 200 15% 65%;
+    --muted: 222 10% 14%;
+    --muted-foreground: 220 8% 55%;
 
-    --accent: 262 83% 58%;
+    --accent: 263 70% 65%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 201 11% 28%;
-    --input: 201 11% 28%;
-    --ring: 186 100% 43%;
+    --border: 222 10% 16%;
+    --input: 222 10% 18%;
+    --ring: 173 80% 40%;
 
-    --sidebar-background: 212 69% 10%;
-    --sidebar-foreground: 200 20% 95%;
-    --sidebar-primary: 186 100% 43%;
-    --sidebar-primary-foreground: 212 69% 8%;
-    --sidebar-accent: 262 83% 58%;
+    --sidebar-background: 222 15% 6%;
+    --sidebar-foreground: 220 10% 93%;
+    --sidebar-primary: 173 80% 40%;
+    --sidebar-primary-foreground: 222 15% 7%;
+    --sidebar-accent: 263 70% 65%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 201 11% 28%;
-    --sidebar-ring: 186 100% 43%;
+    --sidebar-border: 222 10% 14%;
+    --sidebar-ring: 173 80% 40%;
   }
 }
 
@@ -98,72 +98,63 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
 
 @layer utilities {
   .glow-cyan {
-    text-shadow: 0 0 20px hsl(186 100% 43% / 0.5), 0 0 40px hsl(186 100% 43% / 0.3);
+    text-shadow: 0 0 20px hsl(173 80% 40% / 0.4), 0 0 40px hsl(173 80% 40% / 0.15);
   }
   
   .glow-purple {
-    text-shadow: 0 0 20px hsl(262 83% 58% / 0.5), 0 0 40px hsl(262 83% 58% / 0.3);
+    text-shadow: 0 0 20px hsl(263 70% 65% / 0.4), 0 0 40px hsl(263 70% 65% / 0.15);
   }
   
   .box-glow-cyan {
-    box-shadow: 0 0 20px hsl(186 100% 43% / 0.3), 0 0 40px hsl(186 100% 43% / 0.1);
+    box-shadow: 0 4px 24px -4px hsl(173 80% 40% / 0.25);
   }
   
   .box-glow-purple {
-    box-shadow: 0 0 20px hsl(262 83% 58% / 0.3), 0 0 40px hsl(262 83% 58% / 0.1);
+    box-shadow: 0 4px 24px -4px hsl(263 70% 65% / 0.25);
   }
 
-  /* Legacy aliases for compatibility */
+  /* Legacy aliases */
   .glow-green {
-    text-shadow: 0 0 20px hsl(186 100% 43% / 0.5), 0 0 40px hsl(186 100% 43% / 0.3);
+    text-shadow: 0 0 20px hsl(173 80% 40% / 0.4), 0 0 40px hsl(173 80% 40% / 0.15);
   }
-  
   .glow-orange {
-    text-shadow: 0 0 20px hsl(262 83% 58% / 0.5), 0 0 40px hsl(262 83% 58% / 0.3);
+    text-shadow: 0 0 20px hsl(263 70% 65% / 0.4), 0 0 40px hsl(263 70% 65% / 0.15);
   }
-  
   .box-glow-green {
-    box-shadow: 0 0 20px hsl(186 100% 43% / 0.3), 0 0 40px hsl(186 100% 43% / 0.1);
+    box-shadow: 0 4px 24px -4px hsl(173 80% 40% / 0.25);
   }
-  
   .box-glow-orange {
-    box-shadow: 0 0 20px hsl(262 83% 58% / 0.3), 0 0 40px hsl(262 83% 58% / 0.1);
+    box-shadow: 0 4px 24px -4px hsl(263 70% 65% / 0.25);
+  }
+
+  /* MD3 surface elevation tints */
+  .surface-1 {
+    background-color: hsl(222 13% 11%);
+  }
+  .surface-2 {
+    background-color: hsl(222 10% 14%);
+  }
+  .surface-3 {
+    background-color: hsl(222 10% 17%);
   }
 
   /* Help button animations */
   @keyframes ping-slow {
-    0% {
-      transform: scale(1);
-      opacity: 0.6;
-    }
-    50% {
-      transform: scale(1.3);
-      opacity: 0;
-    }
-    100% {
-      transform: scale(1);
-      opacity: 0;
-    }
+    0% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 0; }
   }
 
   @keyframes ping-slower {
-    0% {
-      transform: scale(1);
-      opacity: 0.4;
-    }
-    50% {
-      transform: scale(1.5);
-      opacity: 0;
-    }
-    100% {
-      transform: scale(1);
-      opacity: 0;
-    }
+    0% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 0; }
   }
 
   .animate-ping-slow {

@@ -5,10 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import Index from "./pages/Index";
 import Comprar from "./pages/Comprar";
 import Dashboard from "./pages/Dashboard";
 import Accounts from "./pages/Accounts";
+import MyOrders from "./pages/MyOrders";
 import NotFound from "./pages/NotFound";
 import TermsOfService from "./pages/legal/TermsOfService";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
@@ -18,6 +20,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
     <LanguageProvider>
       <AuthProvider>
         <TooltipProvider>
@@ -29,6 +32,7 @@ const App = () => (
               <Route path="/comprar" element={<Comprar />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/accounts" element={<Accounts />} />
+              <Route path="/mis-ordenes" element={<MyOrders />} />
               <Route path="/terminos" element={<TermsOfService />} />
               <Route path="/privacidad" element={<PrivacyPolicy />} />
               <Route path="/reembolsos" element={<RefundPolicy />} />
@@ -39,6 +43,7 @@ const App = () => (
         </TooltipProvider>
       </AuthProvider>
     </LanguageProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
