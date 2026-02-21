@@ -7,15 +7,15 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Coins, Home, Sparkles, Play, Mic, Menu, X, Plus, MessageSquarePlus, Clock, HelpCircle, Wallet, Sun, Moon, FileText } from "lucide-react";
 import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import AccountMenu from "@/components/dashboard/AccountMenu";
 import RechargeDialog from "@/components/dashboard/RechargeDialog";
 import FeedbackDialog from "@/components/dashboard/FeedbackDialog";
@@ -542,24 +542,20 @@ const Dashboard = () => {
 
             {/* Points & Account */}
             <div className="hidden md:flex items-center gap-4">
-              <HoverCard openDelay={100} closeDelay={200}>
-                <HoverCardTrigger asChild>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-accent rounded-lg cursor-pointer hover:bg-accent/90 transition-colors">
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <div 
+                    onClick={handleRecharge}
+                    className="flex items-center gap-2 px-4 py-2 bg-accent rounded-lg cursor-pointer hover:bg-accent/90 transition-colors"
+                  >
                     <Wallet className="w-4 h-4 text-white" />
                     <span className="font-medium text-white">${balance?.toFixed(2) || "0.00"} Saldo</span>
                   </div>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-48 p-2" align="end">
-                  <Button
-                    onClick={handleRecharge}
-                    className="w-full gap-2"
-                    size="sm"
-                  >
-                    <Plus className="w-4 h-4" />
-                    {t("dashboard.rechargePoints")}
-                  </Button>
-                </HoverCardContent>
-              </HoverCard>
+                </TooltipTrigger>
+                <TooltipContent className="p-2" align="end">
+                  <p className="text-xs font-medium">Recargar Saldo</p>
+                </TooltipContent>
+              </Tooltip>
               <Button
                 variant="outline"
                 size="sm"
@@ -570,7 +566,7 @@ const Dashboard = () => {
                 {t("dashboard.suggestChanges")}
               </Button>
               
-              <AccountMenu email={user?.email || ""} onLogout={handleLogout} pendingOrdersCount={pendingOrdersCount} />
+              <AccountMenu email={user?.email || ""} onLogout={handleLogout} onRecharge={handleRecharge} pendingOrdersCount={pendingOrdersCount} />
               <Button
                 variant="ghost"
                 size="icon"
@@ -634,6 +630,10 @@ const Dashboard = () => {
                 <AccountMenu 
                     email={user?.email || ""} 
                     onLogout={handleLogout} 
+                    onRecharge={() => {
+                      setMobileMenuOpen(false);
+                      handleRecharge();
+                    }}
                     pendingOrdersCount={pendingOrdersCount}
                     className="w-full justify-start px-4"
                 />
