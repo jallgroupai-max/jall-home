@@ -29,6 +29,7 @@ export interface Payment {
         currency: string;
         timestamp: string;
     };
+    responsePayment?: { [key: string]: any };
 }
 
 export interface PaginatedResult<T> {

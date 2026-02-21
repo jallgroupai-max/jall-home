@@ -17,13 +17,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
-import { User, Settings, Key, LogOut, Gift, Pencil, Check, X, Loader2, Globe, FileText } from "lucide-react";
+import { User, Settings, Key, LogOut, Gift, Pencil, Check, X, Loader2, Globe, FileText, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AccountMenuProps {
   email: string;
   onLogout: () => void;
+  onRecharge?: () => void;
   pendingOrdersCount?: number;
   className?: string;
 }
@@ -31,7 +32,7 @@ interface AccountMenuProps {
 // Simulated taken usernames for demo
 const takenUsernames = ["admin", "jallai", "usuario", "test", "demo"];
 
-const AccountMenu = ({ email, onLogout, pendingOrdersCount = 0, className }: AccountMenuProps) => {
+const AccountMenu = ({ email, onLogout, onRecharge, pendingOrdersCount = 0, className }: AccountMenuProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
@@ -141,6 +142,10 @@ const AccountMenu = ({ email, onLogout, pendingOrdersCount = 0, className }: Acc
           <DropdownMenuItem onClick={() => setShowPasswordDialog(true)} className="cursor-pointer">
             <Key className="w-4 h-4 mr-2" />
             {t("account.changePassword")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onRecharge} className="cursor-pointer">
+            <Plus className="w-4 h-4 mr-2" />
+            Recargar Saldo
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowLanguageDialog(true)} className="cursor-pointer">
             <Globe className="w-4 h-4 mr-2" />

@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { 
     ArrowLeft, RefreshCw, FileText, Calendar, DollarSign, ExternalLink, Loader2,
-    Home, Sparkles, Mic, Play, Menu, X, Wallet, Plus, MessageSquarePlus, Sun, Moon, Coins
+    Home, Sparkles, Mic, Play, Menu, X, Wallet, Plus, MessageSquarePlus, Sun, Moon, Coins, Download
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -350,12 +350,26 @@ const MyOrders = () => {
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    {order.receiptFile?.url ? (
-                                                        <Button variant="ghost" size="sm" asChild>
-                                                            <a href={order.receiptFile.url} target="_blank" rel="noopener noreferrer" className="gap-2">
-                                                                Ver <ExternalLink className="h-3 w-3" />
-                                                            </a>
-                                                        </Button>
+                                                    {(order.receiptFile?.url || (order.responsePayment as any)?.proofKey) ? (
+                                                        <div className="flex justify-end items-center gap-1">
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8" asChild title="Ver">
+                                                                <a 
+                                                                    href={order.receiptFile?.url || `${import.meta.env.VITE_API_URL || 'http://localhost:3002/api'}/storage/public/${(order.responsePayment as any).proofKey}`} 
+                                                                    target="_blank" 
+                                                                    rel="noopener noreferrer"
+                                                                >
+                                                                    <ExternalLink className="h-4 w-4 text-primary" />
+                                                                </a>
+                                                            </Button>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8" asChild title="Descargar">
+                                                                <a 
+                                                                    href={`${import.meta.env.VITE_API_URL || 'http://localhost:3002/api'}/storage/download/${order.receiptFile?.key || (order.responsePayment as any).proofKey}`} 
+                                                                    download
+                                                                >
+                                                                    <Download className="h-4 w-4 text-primary" />
+                                                                </a>
+                                                            </Button>
+                                                        </div>
                                                     ) : (
                                                         <span className="text-muted-foreground text-sm">-</span>
                                                     )}

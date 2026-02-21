@@ -2,43 +2,83 @@ import { Button } from "@/components/ui/button";
 import { Check, Sparkles, Play, Zap, Rocket } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+import { useState, useEffect } from "react";
+import { apiService } from "@/lib/api";
+
 const Pricing = () => {
   const { t, isVenezuela } = useLanguage();
+  const [providers, setProviders] = useState<any[]>([]);
 
-  const tools = [
-    {
-      name: "Agente ChatGPT",
-      icon: Sparkles,
-      color: "primary" as const,
-      plans: [
-        { label: t("pricing.day"), regular: "$0.70", promo: "$0.30", planComingSoon: false },
-        { label: t("pricing.week"), regular: "$4.00", promo: "$1.80", planComingSoon: false },
-      ],
-      benefits: [
-        t("pricing.chatgpt.benefit1"),
-        t("pricing.chatgpt.benefit2"),
-        t("pricing.chatgpt.benefit3"),
-        t("pricing.chatgpt.benefit4"),
-      ],
-      comingSoon: false,
-    },
-    {
-      name: "Plan Creador Google AI",
-      icon: Play,
-      color: "accent" as const,
-      plans: [
-        { label: t("pricing.day"), regular: "$7.00", promo: "$1.50", planComingSoon: false },
-        { label: "15 " + t("pricing.days"), regular: "", promo: "", planComingSoon: true },
-      ],
-      benefits: [
-        t("pricing.aiultra.benefit1"),
-        t("pricing.aiultra.benefit2"),
-        t("pricing.aiultra.benefit3"),
-        t("pricing.aiultra.benefit4"),
-      ],
-      comingSoon: false,
-    },
-  ];
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const data = await apiService.get<any>('/providers/public/all');
+        if (data) {
+          const hasChatGPT = data.some((p: any) => p.typeProvider.toLowerCase() === 'chatgpt');
+          const filtered = hasChatGPT ? data.filter((p: any) => p.typeProvider.toLowerCase() === 'chatgpt') : data;
+          setProviders(filtered);
+        }
+      } catch (error) {
+        console.error("Error fetching providers:", error);
+      }
+    };
+    fetchProviders();
+  }, []);
+
+  const getTools = () => {
+    if (providers.length === 0) {
+      return [
+        {
+          name: "Agente ChatGPT",
+          icon: Sparkles,
+          color: "primary" as const,
+          plans: [
+            { label: t("pricing.day"), regular: "$0.70", promo: "$0.30", planComingSoon: false },
+            { label: t("pricing.week"), regular: "$4.00", promo: "$1.80", planComingSoon: false },
+          ],
+          benefits: [
+            t("pricing.instantAccess"),
+            isVenezuela ? t("pricing.paymentBs") : t("pricing.paymentFlex"),
+            t("pricing.whatsappSupport"),
+          ],
+          comingSoon: false,
+        }
+      ];
+    }
+
+    return providers.map(p => {
+      const isChatGPT = p.typeProvider.toLowerCase() === 'chatgpt';
+      const isGoogle = p.typeProvider.toLowerCase() === 'google ai ultra';
+      
+      return {
+        name: isChatGPT ? "Agente ChatGPT" : (isGoogle ? "Plan Creador Google AI" : p.typeProvider),
+        icon: isChatGPT ? Sparkles : (isGoogle ? Play : Rocket),
+        color: isChatGPT ? "primary" as const : "accent" as const,
+        plans: [
+          { 
+            label: t("pricing.day"), 
+            regular: isChatGPT ? "$0.70" : (isGoogle ? "$7.00" : ""), 
+            promo: `$${p.finalPrice.toFixed(2)}`, 
+            planComingSoon: false 
+          },
+          { 
+            label: isChatGPT ? t("pricing.week") : ("15 " + t("pricing.days")), 
+            regular: isChatGPT ? "$4.00" : (isGoogle ? "$15.00" : ""), 
+            promo: isChatGPT ? `$${p.finalPriceWeekly.toFixed(2)}` : (isGoogle ? `$${p.finalPriceWeekly.toFixed(2)}` : ""), 
+            planComingSoon: isGoogle && p.finalPriceWeekly === 0
+          },
+        ],
+        benefits: [
+          t("pricing.instantAccess"),
+          isVenezuela ? t("pricing.paymentBs") : t("pricing.paymentFlex"),
+          t("pricing.whatsappSupport"),
+        ],
+        comingSoon: !p.active,
+      };
+    });
+  };
+
+  const tools = getTools();
 
   return (
     <section id="precios" className="py-20 px-4">
@@ -53,7 +93,7 @@ const Pricing = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-1 gap-6 max-w-2xl mx-auto">
           {tools.map((tool) => (
             <div
               key={tool.name}
@@ -142,33 +182,12 @@ const Pricing = () => {
                     <span>{benefit}</span>
                   </div>
                 ))}
-                <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                  <Check className={`w-4 h-4 flex-shrink-0 ${tool.color === "primary" ? "text-primary" : "text-accent"}`} />
-                  <span>{t("pricing.instantAccess")}</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                  <Check className={`w-4 h-4 flex-shrink-0 ${tool.color === "primary" ? "text-primary" : "text-accent"}`} />
-                  <span>{isVenezuela ? t("pricing.paymentBs") : t("pricing.paymentFlex")}</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                  <Check className={`w-4 h-4 flex-shrink-0 ${tool.color === "primary" ? "text-primary" : "text-accent"}`} />
-                  <span>{t("pricing.whatsappSupport")}</span>
-                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Coming soon banner */}
-        <div className="mt-10 max-w-4xl mx-auto">
-          <div className="flex items-center justify-center gap-3 p-4 rounded-2xl border border-accent/15 bg-accent/5 text-center">
-            <Rocket className="w-5 h-5 text-accent" />
-            <p className="text-sm text-muted-foreground">
-              <span className="text-accent font-medium">{t("pricing.comingSoon")}:</span>{" "}
-              {t("pricing.newAgents")}
-            </p>
-          </div>
-        </div>
+    
 
         <p className="text-center text-muted-foreground mt-8 text-xs">
           {isVenezuela ? t("pricing.disclaimer") : t("pricing.disclaimerGlobal")}

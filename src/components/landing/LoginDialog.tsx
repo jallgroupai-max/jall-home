@@ -22,12 +22,6 @@ interface LoginDialogProps {
   onSwitchToRegister: () => void;
 }
 
-// Usuario por defecto para demo
-const DEFAULT_USER = {
-  email: "demo@jallai.com",
-  password: "demo123"
-};
-
 const LoginDialog = ({ open, onOpenChange, onSwitchToRegister }: LoginDialogProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,8 +50,6 @@ const LoginDialog = ({ open, onOpenChange, onSwitchToRegister }: LoginDialogProp
     try {
       const response = await authService.signIn({ email, password });
       
-      // OTP DISABLED - Always use normal login flow
-      // Check if we have user and access data
       if (response.ok && response.access && response.user) {
         // Normal login - use response data directly
         setAuthData(response.user, response.access.accessToken);
@@ -68,13 +60,9 @@ const LoginDialog = ({ open, onOpenChange, onSwitchToRegister }: LoginDialogProp
         onOpenChange(false);
         navigate("/dashboard");
       } else if (response.ok && response.message && !response.access) {
-        // OTP would be required, but we're skipping it
-        // Show error message instead
-        toast({
-          title: "Verificación pendiente",
-          description: "Tu cuenta requiere verificación. Contacta al administrador.",
-          variant: "destructive",
-        });
+        // OTP Required
+        setMaskedEmail(response.message);
+        setShowOtpDialog(true);
       } else {
         toast({
           title: "Error inesperado",

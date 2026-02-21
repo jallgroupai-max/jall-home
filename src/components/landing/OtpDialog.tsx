@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Coins } from "lucide-react";
 
 interface OtpDialogProps {
   open: boolean;
@@ -129,8 +130,10 @@ const OtpDialog = ({
             Verificación de correo
           </DialogTitle>
           <DialogDescription className="text-center">
-            Hemos enviado un código de verificación a <br />
-            <strong className="text-primary">{maskedEmail}</strong>
+             Verifica tu correo y recibe de regalo <br/> 150 créditos <Coins className="w-5 h-5 text-accent inline" /> 
+             <br/>  
+             <br/>
+            <strong className="text-primary mt-4">{maskedEmail}</strong>
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
