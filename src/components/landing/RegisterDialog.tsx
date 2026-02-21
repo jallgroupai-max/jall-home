@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { apiService } from "@/lib/api";
 
 interface RegisterDialogProps {
   open: boolean;
@@ -40,15 +41,29 @@ const RegisterDialog = ({ open, onOpenChange, onSwitchToLogin }: RegisterDialogP
 
     setIsLoading(true);
     
-    // Siempre mostrar error - sistema no disponible
-    setTimeout(() => {
+    try {
+      await apiService.post('/users', {
+        email,
+        password,
+        name: username
+      });
+
       toast({
-        title: t("register.error.unavailable"),
-        description: t("register.error.unavailableDesc"),
+        title: "Registro exitoso",
+        description: "Tu cuenta ha sido creada exitosamente. Por favor, inicia sesión.",
+      });
+
+      onOpenChange(false);
+      onSwitchToLogin();
+    } catch (error: any) {
+      toast({
+        title: "Error en el registro",
+        description: error.message || "No se pudo crear el usuario. Inténtalo de nuevo.",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

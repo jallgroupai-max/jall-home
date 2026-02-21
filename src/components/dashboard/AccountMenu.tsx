@@ -16,20 +16,25 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { User, Settings, Key, LogOut, Gift, Pencil, Check, X, Loader2, Globe } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { User, Settings, Key, LogOut, Gift, Pencil, Check, X, Loader2, Globe, FileText, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AccountMenuProps {
   email: string;
   onLogout: () => void;
+  onRecharge?: () => void;
+  pendingOrdersCount?: number;
+  className?: string;
 }
 
 // Simulated taken usernames for demo
 const takenUsernames = ["admin", "jallai", "usuario", "test", "demo"];
 
-const AccountMenu = ({ email, onLogout }: AccountMenuProps) => {
+const AccountMenu = ({ email, onLogout, onRecharge, pendingOrdersCount = 0, className }: AccountMenuProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { language, setLanguage, t } = useLanguage();
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
@@ -105,9 +110,12 @@ const AccountMenu = ({ email, onLogout }: AccountMenuProps) => {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className={`gap-2 relative ${className}`}>
             <User className="w-4 h-4" />
             {t("account.title")}
+            {pendingOrdersCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 animate-pulse border-2 border-background" />
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 bg-card border-border z-50">
@@ -122,9 +130,22 @@ const AccountMenu = ({ email, onLogout }: AccountMenuProps) => {
             <Settings className="w-4 h-4 mr-2" />
             {t("account.profile")}
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate('/mis-ordenes')} className="cursor-pointer">
+            <FileText className="w-4 h-4 mr-2" />
+            Mis Órdenes
+            {pendingOrdersCount > 0 && (
+                <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                    {pendingOrdersCount}
+                </span>
+            )}
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowPasswordDialog(true)} className="cursor-pointer">
             <Key className="w-4 h-4 mr-2" />
             {t("account.changePassword")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onRecharge} className="cursor-pointer">
+            <Plus className="w-4 h-4 mr-2" />
+            Recargar Saldo
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowLanguageDialog(true)} className="cursor-pointer">
             <Globe className="w-4 h-4 mr-2" />
