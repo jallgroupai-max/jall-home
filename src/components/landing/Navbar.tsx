@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Globe } from "lucide-react";
 import {
@@ -8,14 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
-import LoginDialog from "./LoginDialog";
-import RegisterDialog from "./RegisterDialog";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [registerOpen, setRegisterOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const navigate = useNavigate();
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -32,7 +30,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <span className="text-xl font-semibold tracking-tight text-foreground">
-              Jall<span className="text-primary"> AI</span>
+              Jall<span className="text-primary">AI</span>
             </span>
           </div>
 
@@ -86,14 +84,14 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setLoginOpen(true)}
+              onClick={() => navigate("/login")}
               className="text-muted-foreground hover:text-foreground"
             >
               {t("nav.login")}
             </Button>
             <Button
               size="sm"
-              onClick={() => setRegisterOpen(true)}
+              onClick={() => navigate("/register")}
             >
               {t("nav.register")}
             </Button>
@@ -153,14 +151,14 @@ const Navbar = () => {
             <div className="pt-3 space-y-2 border-t border-border">
               <Button
                 variant="ghost"
-                onClick={() => { setIsOpen(false); setLoginOpen(true); }}
+                onClick={() => { setIsOpen(false); navigate("/login"); }}
                 className="w-full justify-start text-muted-foreground"
                 size="sm"
               >
                 {t("nav.login")}
               </Button>
               <Button
-                onClick={() => { setIsOpen(false); setRegisterOpen(true); }}
+                onClick={() => { setIsOpen(false); navigate("/register"); }}
                 className="w-full"
                 size="sm"
               >
@@ -170,19 +168,9 @@ const Navbar = () => {
           </div>
         )}
       </div>
-
-      <LoginDialog
-        open={loginOpen}
-        onOpenChange={setLoginOpen}
-        onSwitchToRegister={() => setRegisterOpen(true)}
-      />
-      <RegisterDialog
-        open={registerOpen}
-        onOpenChange={setRegisterOpen}
-        onSwitchToLogin={() => setLoginOpen(true)}
-      />
     </nav>
   );
 };
 
 export default Navbar;
+
