@@ -1,14 +1,11 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Play, DollarSign, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import RegisterDialog from "./RegisterDialog";
-import LoginDialog from "./LoginDialog";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
-  const [registerOpen, setRegisterOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
   const { t, isVenezuela } = useLanguage();
+  const navigate = useNavigate();
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -49,7 +46,7 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
                 size="lg"
-                onClick={() => setRegisterOpen(true)}
+                onClick={() => navigate("/register")}
                 className="text-base px-6 gap-2"
               >
                 {t("hero.registerFree")}
@@ -140,16 +137,6 @@ const Hero = () => {
         </div>
       </div>
 
-      <RegisterDialog
-        open={registerOpen}
-        onOpenChange={setRegisterOpen}
-        onSwitchToLogin={() => setLoginOpen(true)}
-      />
-      <LoginDialog
-        open={loginOpen}
-        onOpenChange={setLoginOpen}
-        onSwitchToRegister={() => setRegisterOpen(true)}
-      />
     </section>
   );
 };
