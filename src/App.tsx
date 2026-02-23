@@ -20,10 +20,8 @@ import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import RefundPolicy from "./pages/legal/RefundPolicy";
 
 const queryClient = new QueryClient();
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "";
 
 const App = () => (
-  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <LanguageProvider>
@@ -52,7 +50,6 @@ const App = () => (
       </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
-  </GoogleOAuthProvider>
 );
 
 export default App;
