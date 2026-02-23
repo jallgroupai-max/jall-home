@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useGoogleLogin } from "@react-oauth/google";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -83,49 +82,6 @@ export default function Register() {
       });
     }
   };
-
-  /* ─── Google Sign-In ─────────────────────────────────────── */
-  const handleGoogleSuccess = async (tokenResponse: { access_token?: string; credential?: string }) => {
-    setIsGoogleLoading(true);
-    try {
-      const token = tokenResponse.credential ?? tokenResponse.access_token ?? "";
-      const response = await authService.googleSignIn(token);
-
-      if (response.ok && response.access && response.user) {
-        setAuthData(response.user, response.access.accessToken);
-        toast({
-          title: "¡Cuenta creada con Google!",
-          description: `Hola ${response.user.name || response.user.email}`,
-        });
-        navigate("/dashboard");
-      } else {
-        toast({
-          title: "Error con Google",
-          description: "No se pudo autenticar con Google",
-          variant: "destructive",
-        });
-      }
-    } catch (err: any) {
-      toast({
-        title: "Error con Google",
-        description: err.message || "No se pudo autenticar con Google",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: handleGoogleSuccess,
-    onError: () => {
-      toast({
-        title: "Error con Google",
-        description: "La autenticación con Google falló",
-        variant: "destructive",
-      });
-    },
-  });
 
   /* ─── Render ─────────────────────────────────────────────── */
   return (
