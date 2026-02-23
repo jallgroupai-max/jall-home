@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Check, Sparkles, Play, Zap, Rocket } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
 
 import { useState, useEffect } from "react";
 import { apiService } from "@/lib/api";
 
 const Pricing = () => {
   const { t, isVenezuela } = useLanguage();
+  const navigate = useNavigate();
   const [providers, setProviders] = useState<any[]>([]);
 
   useEffect(() => {
@@ -159,7 +161,7 @@ const Pricing = () => {
                           </div>
                         </div>
                         <Button
-                          onClick={() => window.location.href = '/comprar'}
+                          onClick={() => navigate('/register')}
                           className="w-full"
                           size="sm"
                           variant={tool.color === "primary" ? "default" : "secondary"}
