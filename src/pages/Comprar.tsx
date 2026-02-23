@@ -1,50 +1,10 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ArrowLeft, Wallet, Gift, CheckCircle, Sparkles, CreditCard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 
 const Comprar = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [showRechargeDialog, setShowRechargeDialog] = useState(false);
-  const [hasAccount, setHasAccount] = useState<boolean | null>(null);
-  const [isLogin, setIsLogin] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Las contraseñas no coinciden",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: isLogin ? "¡Bienvenido de vuelta!" : "¡Cuenta creada!",
-      description: isLogin 
-        ? "Redirigiendo a tu panel de recarga..." 
-        : "Verifica tu email para recibir $1.5 gratis. Redirigiendo...",
-    });
-
-    // Simulate redirect
-    setTimeout(() => {
-      setShowRechargeDialog(false);
-      setHasAccount(null);
-    }, 2000);
-  };
 
   return (
     <div className="min-h-screen bg-background py-16 px-4">
@@ -135,7 +95,7 @@ const Comprar = () => {
             <Button 
               size="lg" 
               className="box-glow-green whitespace-nowrap"
-              onClick={() => setShowRechargeDialog(true)}
+              onClick={() => navigate('/register')}
             >
               <CreditCard className="w-4 h-4 mr-2" />
               Recargar Ahora
@@ -171,105 +131,6 @@ const Comprar = () => {
         </Card>
       </div>
 
-      {/* Recharge Dialog */}
-      <Dialog open={showRechargeDialog} onOpenChange={setShowRechargeDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {hasAccount === null 
-                ? "¿Ya tienes cuenta?" 
-                : isLogin 
-                  ? "Iniciar Sesión" 
-                  : "Crear Cuenta"}
-            </DialogTitle>
-            <DialogDescription>
-              {hasAccount === null 
-                ? "Para acreditar tu recarga necesitamos saber si ya estás registrado."
-                : isLogin
-                  ? "Ingresa tus credenciales para continuar"
-                  : "Crea tu cuenta y recibe $1.5 gratis al verificar tu email"}
-            </DialogDescription>
-          </DialogHeader>
-
-          {hasAccount === null ? (
-            <div className="flex flex-col gap-4 pt-4">
-              <Button 
-                size="lg" 
-                onClick={() => {
-                  setHasAccount(true);
-                  setIsLogin(true);
-                }}
-                className="box-glow-green"
-              >
-                Sí, tengo cuenta
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                onClick={() => {
-                  setHasAccount(false);
-                  setIsLogin(false);
-                }}
-                className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
-              >
-                No, quiero registrarme
-              </Button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                />
-              </div>
-              {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    required
-                  />
-                </div>
-              )}
-              <Button type="submit" className="w-full box-glow-green">
-                {isLogin ? "Iniciar Sesión" : "Crear Cuenta"}
-              </Button>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                className="w-full"
-                onClick={() => {
-                  setHasAccount(null);
-                  setFormData({ email: "", password: "", confirmPassword: "" });
-                }}
-              >
-                Volver
-              </Button>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
