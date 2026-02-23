@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,42 @@ export default function Login() {
   const { t } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Si viene de un registro exitoso: disparar OTP automáticamente
+  useEffect(() => {
+    const state = location.state as {
+      registered?: boolean;
+      autoOtp?: boolean;
+      email?: string;
+      password?: string;
+    } | null;
+
+    if (state?.autoOtp && state.email && state.password) {
+      // Pre-rellenar campos visualmente
+      setEmail(state.email);
+      setPassword(state.password);
+      // Limpiar state del historial
+      window.history.replaceState({}, document.title);
+      // Disparar el sign-in para enviar el OTP
+      authService.signIn({ email: state.email, password: state.password })
+        .then((response) => {
+          if (response.ok && response.message && !response.access) {
+            setMaskedEmail(response.message);
+            setShowOtpDialog(true);
+          }
+        })
+        .catch(() => {/* silencioso, el usuario puede intentar manualmente */});
+    } else if (state?.registered) {
+      if (state.email) setEmail(state.email);
+      toast({
+        title: "✅ Cuenta creada exitosamente",
+        description: "Tu correo fue verificado. Inicia sesión para continuar.",
+      });
+      window.history.replaceState({}, document.title);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ─── Email / Password Login ─────────────────────────────── */
   const handleSubmit = async (e: React.FormEvent) => {

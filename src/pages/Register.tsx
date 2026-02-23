@@ -15,6 +15,7 @@ export default function Register() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showOtpDialog, setShowOtpDialog] = useState(false);
   const [maskedEmail, setMaskedEmail] = useState("");
+  const [showEmailExistsModal, setShowEmailExistsModal] = useState(false);
 
   const { setAuthData } = useAuth();
   const { t } = useLanguage();
@@ -38,26 +39,23 @@ export default function Register() {
     try {
       await apiService.post("/users", { email, password, name });
 
-      toast({
-        title: "Registro exitoso",
-        description: "Tu cuenta fue creada. Verifica tu correo con el código que te enviamos.",
-      });
-
-      // Trigger OTP flow by signing in (backend sends OTP if email not verified)
-      const response = await authService.signIn({ email, password });
-      if (response.ok && response.message && !response.access) {
-        setMaskedEmail(response.message);
-        setShowOtpDialog(true);
-      } else if (response.ok && response.access && response.user) {
-        setAuthData(response.user, response.access.accessToken);
-        navigate("/dashboard");
-      }
+      // Redirigir a login para que dispare el OTP desde allí
+      navigate("/login", { state: { autoOtp: true, email, password } });
     } catch (error: any) {
-      toast({
-        title: "Error en el registro",
-        description: error.message || "No se pudo crear el usuario. Inténtalo de nuevo.",
-        variant: "destructive",
-      });
+      const isEmailTaken =
+        error?.status === 409 ||
+        error?.statusCode === 409 ||
+        error?.message?.includes('EMAIL_ALREADY_EXISTS');
+
+      if (isEmailTaken) {
+        setShowEmailExistsModal(true);
+      } else {
+        toast({
+          title: "Error en el registro",
+          description: error.message || "No se pudo crear el usuario. Inténtalo de nuevo.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -68,12 +66,9 @@ export default function Register() {
     try {
       const user = await authService.getProfile(accessToken);
       setAuthData(user, accessToken);
-      toast({
-        title: "¡Bienvenido!",
-        description: `Hola ${user.name || user.email}`,
-      });
       setShowOtpDialog(false);
-      navigate("/dashboard");
+      // Redirigir a login con indicador de registro exitoso
+      navigate("/login", { state: { registered: true, email } });
     } catch {
       toast({
         title: "Error",
@@ -300,6 +295,68 @@ export default function Register() {
         maskedEmail={maskedEmail}
         onVerifySuccess={handleOtpVerifySuccess}
       />
+
+      {/* Modal — Correo ya registrado */}
+      {showEmailExistsModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
+          onClick={() => setShowEmailExistsModal(false)}
+        >
+          <div
+            className="relative w-full max-w-sm rounded-3xl p-8 shadow-2xl"
+            style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Ícono */}
+            <div
+              className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl"
+              style={{ background: "hsl(var(--primary) / 0.12)" }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-8 w-8"
+                style={{ color: "hsl(var(--primary))" }}
+              >
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+            </div>
+
+            {/* Texto */}
+            <h2 className="mb-2 text-center text-xl font-bold text-foreground">
+              Correo ya registrado
+            </h2>
+            <p className="mb-6 text-center text-sm text-muted-foreground leading-relaxed">
+              El correo{" "}
+              <span className="font-medium text-foreground">{email}</span> ya
+              tiene una cuenta en JallAI. Inicia sesión para continuar.
+            </p>
+
+            {/* Botones */}
+            <button
+              onClick={() => navigate("/login")}
+              className="mb-3 w-full rounded-2xl py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 hover:shadow-lg active:scale-[0.98]"
+              style={{ background: "hsl(var(--primary))" }}
+            >
+              Ir a iniciar sesión
+            </button>
+            <button
+              onClick={() => setShowEmailExistsModal(false)}
+              className="w-full rounded-2xl py-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              style={{ background: "hsl(var(--secondary))" }}
+            >
+              Intentar con otro correo
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
