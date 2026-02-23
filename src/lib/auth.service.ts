@@ -29,6 +29,10 @@ export const authService = {
         return apiService.post<SignInResponse>('/auth/signin', credentials);
     },
 
+    async googleSignIn(idToken: string): Promise<SignInResponse> {
+        return apiService.post<SignInResponse>('/auth/google', { idToken });
+    },
+
     async logout(token: string): Promise<void> {
         return apiService.post<void>('/auth/logout', {}, token);
     },
