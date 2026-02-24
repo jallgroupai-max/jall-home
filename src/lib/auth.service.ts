@@ -40,4 +40,12 @@ export const authService = {
     async getProfile(token: string): Promise<User> {
         return apiService.get<User>('/auth/profile', token);
     },
+
+    async forgotPassword(email: string): Promise<{ ok: boolean }> {
+        return apiService.post<{ ok: boolean }>('/auth/forgot/password', { email });
+    },
+
+    async resetPasswordByToken(accessPassword: string, password: string): Promise<{ ok: boolean }> {
+        return apiService.post<{ ok: boolean }>('/auth/update/password/by-token', { accessPassword, password });
+    },
 };

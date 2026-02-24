@@ -18,6 +18,8 @@ import NotFound from "./pages/NotFound";
 import TermsOfService from "./pages/legal/TermsOfService";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import RefundPolicy from "./pages/legal/RefundPolicy";
+import Recovery from "./pages/Recovery";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,8 @@ const App = () => (
                 <Route path="/terminos" element={<TermsOfService />} />
                 <Route path="/privacidad" element={<PrivacyPolicy />} />
                 <Route path="/reembolsos" element={<RefundPolicy />} />
+                <Route path="/recovery" element={<Recovery />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
