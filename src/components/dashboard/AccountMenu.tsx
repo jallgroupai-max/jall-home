@@ -110,28 +110,40 @@ const AccountMenu = ({ email, onLogout, onRecharge, pendingOrdersCount = 0, clas
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className={`gap-2 relative ${className}`}>
-            <User className="w-4 h-4" />
-            {t("account.title")}
+          <Button variant="ghost" size="sm" className={`gap-2.5 relative px-2 hover:bg-secondary rounded-xl ${className}`}>
+            {/* User initial avatar */}
+            <div className="w-7 h-7 rounded-xl bg-primary/15 flex items-center justify-center text-primary font-bold text-xs">
+              {email ? email[0].toUpperCase() : <User className="w-3.5 h-3.5" />}
+            </div>
+            <span className="hidden sm:block text-sm font-medium">{t("account.title")}</span>
             {pendingOrdersCount > 0 && (
                 <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 animate-pulse border-2 border-background" />
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 bg-card border-border z-50">
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium">{t("account.myAccount")}</p>
-              <p className="text-xs text-muted-foreground truncate">{email}</p>
+        <DropdownMenuContent align="end" className="w-56 bg-card border-border/60 rounded-2xl shadow-xl z-50 p-1">
+          <DropdownMenuLabel className="font-normal px-2 py-2">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
+                {email ? email[0].toUpperCase() : <User className="w-4 h-4" />}
+              </div>
+              <div className="flex flex-col overflow-hidden">
+                <p className="text-sm font-semibold truncate">{t("account.myAccount")}</p>
+                <p className="text-xs text-muted-foreground truncate">{email}</p>
+              </div>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setShowProfileDialog(true)} className="cursor-pointer">
-            <Settings className="w-4 h-4 mr-2" />
+          <DropdownMenuSeparator className="mx-1" />
+          <DropdownMenuItem onClick={() => setShowProfileDialog(true)} className="cursor-pointer rounded-xl gap-3 px-2">
+            <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+              <Settings className="w-3.5 h-3.5" />
+            </div>
             {t("account.profile")}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate('/mis-ordenes')} className="cursor-pointer">
-            <FileText className="w-4 h-4 mr-2" />
+          <DropdownMenuItem onClick={() => navigate('/mis-ordenes')} className="cursor-pointer rounded-xl gap-3 px-2">
+            <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+              <FileText className="w-3.5 h-3.5" />
+            </div>
             Mis Órdenes
             {pendingOrdersCount > 0 && (
                 <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
@@ -139,21 +151,29 @@ const AccountMenu = ({ email, onLogout, onRecharge, pendingOrdersCount = 0, clas
                 </span>
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setShowPasswordDialog(true)} className="cursor-pointer">
-            <Key className="w-4 h-4 mr-2" />
+          <DropdownMenuItem onClick={() => setShowPasswordDialog(true)} className="cursor-pointer rounded-xl gap-3 px-2">
+            <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+              <Key className="w-3.5 h-3.5" />
+            </div>
             {t("account.changePassword")}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onRecharge} className="cursor-pointer">
-            <Plus className="w-4 h-4 mr-2" />
-            Recargar Saldo
+          <DropdownMenuItem onClick={onRecharge} className="cursor-pointer rounded-xl gap-3 px-2">
+            <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+              <Plus className="w-3.5 h-3.5" />
+            </div>
+            Recargar Puntos
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setShowLanguageDialog(true)} className="cursor-pointer">
-            <Globe className="w-4 h-4 mr-2" />
+          <DropdownMenuItem onClick={() => setShowLanguageDialog(true)} className="cursor-pointer rounded-xl gap-3 px-2">
+            <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
+              <Globe className="w-3.5 h-3.5" />
+            </div>
             {t("account.language")}
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onLogout} className="cursor-pointer text-destructive focus:text-destructive focus:bg-secondary">
-            <LogOut className="w-4 h-4 mr-2" />
+          <DropdownMenuSeparator className="mx-1" />
+          <DropdownMenuItem onClick={onLogout} className="cursor-pointer rounded-xl gap-3 px-2 text-destructive focus:text-destructive focus:bg-destructive/10">
+            <div className="w-7 h-7 rounded-lg bg-destructive/10 flex items-center justify-center flex-shrink-0">
+              <LogOut className="w-3.5 h-3.5 text-destructive" />
+            </div>
             {t("account.logout")}
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -161,7 +181,7 @@ const AccountMenu = ({ email, onLogout, onRecharge, pendingOrdersCount = 0, clas
 
       {/* Profile Dialog */}
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-3xl">
           <DialogHeader>
             <DialogTitle>{t("account.myProfile")}</DialogTitle>
             <DialogDescription>{t("account.accountInfo")}</DialogDescription>
@@ -267,7 +287,7 @@ const AccountMenu = ({ email, onLogout, onRecharge, pendingOrdersCount = 0, clas
 
       {/* Password Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-3xl">
           <DialogHeader>
             <DialogTitle>{t("account.passwordTitle")}</DialogTitle>
             <DialogDescription>{t("account.passwordSubtitle")}</DialogDescription>
@@ -275,17 +295,17 @@ const AccountMenu = ({ email, onLogout, onRecharge, pendingOrdersCount = 0, clas
           <form onSubmit={handlePasswordChange} className="space-y-4 pt-4">
             <div className="space-y-2">
               <Label htmlFor="currentPassword">{t("account.currentPassword")}</Label>
-              <Input id="currentPassword" type="password" placeholder="••••••••" required />
+              <Input id="currentPassword" type="password" placeholder="••••••••" required className="rounded-xl" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="newPassword">{t("account.newPassword")}</Label>
-              <Input id="newPassword" type="password" placeholder="••••••••" required />
+              <Input id="newPassword" type="password" placeholder="••••••••" required className="rounded-xl" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmNewPassword">{t("account.confirmPassword")}</Label>
-              <Input id="confirmNewPassword" type="password" placeholder="••••••••" required />
+              <Input id="confirmNewPassword" type="password" placeholder="••••••••" required className="rounded-xl" />
             </div>
-            <Button type="submit" className="w-full box-glow-cyan">
+            <Button type="submit" className="w-full rounded-2xl">
               {t("account.saveChanges")}
             </Button>
           </form>
@@ -294,7 +314,7 @@ const AccountMenu = ({ email, onLogout, onRecharge, pendingOrdersCount = 0, clas
 
       {/* Language Dialog */}
       <Dialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm rounded-3xl">
           <DialogHeader>
             <DialogTitle>{t("account.language")}</DialogTitle>
           </DialogHeader>
@@ -304,10 +324,10 @@ const AccountMenu = ({ email, onLogout, onRecharge, pendingOrdersCount = 0, clas
                 setLanguage("es");
                 setShowLanguageDialog(false);
               }}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-all ${
+              className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all ${
                 language === "es" 
                   ? "border-primary bg-primary/10 text-primary" 
-                  : "border-border hover:border-primary/50"
+                  : "border-border hover:border-primary/50 hover:bg-secondary/50"
               }`}
             >
               <span className="text-xl">🇪🇸</span>
@@ -319,10 +339,10 @@ const AccountMenu = ({ email, onLogout, onRecharge, pendingOrdersCount = 0, clas
                 setLanguage("en");
                 setShowLanguageDialog(false);
               }}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-all ${
+              className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all ${
                 language === "en" 
                   ? "border-primary bg-primary/10 text-primary" 
-                  : "border-border hover:border-primary/50"
+                  : "border-border hover:border-primary/50 hover:bg-secondary/50"
               }`}
             >
               <span className="text-xl">🇺🇸</span>

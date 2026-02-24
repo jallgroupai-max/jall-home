@@ -252,22 +252,42 @@ const RechargeDialog = ({ open, onOpenChange }: RechargeDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg rounded-3xl">
         <DialogHeader>
-          <DialogTitle>
-            {step === "method" && t("recharge.methodTitle")}
-            {step === "amount" && t("recharge.amountTitle")}
-            {step === "payment" && t("recharge.paymentTitle")}
-            {step === "confirm" && t("recharge.confirmTitle")}
-            {step === "card_maintenance" && t("recharge.cardMaintenanceTitle")}
-          </DialogTitle>
-          <DialogDescription>
-            {step === "method" && t("recharge.methodDesc")}
-            {step === "amount" && t("recharge.amountDesc")}
-            {step === "payment" && t("recharge.paymentDesc")}
-            {step === "confirm" && t("recharge.confirmDesc")}
-            {step === "card_maintenance" && t("recharge.cardMaintenanceMessage")}
-          </DialogDescription>
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Coins className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <DialogTitle className="text-lg">
+                {step === "method" && t("recharge.methodTitle")}
+                {step === "amount" && t("recharge.amountTitle")}
+                {step === "payment" && t("recharge.paymentTitle")}
+                {step === "confirm" && t("recharge.confirmTitle")}
+                {step === "card_maintenance" && t("recharge.cardMaintenanceTitle")}
+              </DialogTitle>
+              <DialogDescription className="text-xs mt-0.5">
+                {step === "method" && t("recharge.methodDesc")}
+                {step === "amount" && t("recharge.amountDesc")}
+                {step === "payment" && t("recharge.paymentDesc")}
+                {step === "confirm" && t("recharge.confirmDesc")}
+                {step === "card_maintenance" && t("recharge.cardMaintenanceMessage")}
+              </DialogDescription>
+            </div>
+          </div>
+          {/* Step indicator */}
+          <div className="flex gap-1.5 mt-2">
+            {["method", "amount", "payment", "confirm"].map((s, i) => (
+              <div
+                key={s}
+                className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                  ["method", "amount", "payment", "confirm"].indexOf(step) >= i
+                    ? "bg-primary"
+                    : "bg-border"
+                }`}
+              />
+            ))}
+          </div>
         </DialogHeader>
 
         <div className="pt-4">
@@ -285,17 +305,21 @@ const RechargeDialog = ({ open, onOpenChange }: RechargeDialogProps) => {
                 <Label
                   key={method.id}
                   htmlFor={method.id}
-                  className={`flex items-center gap-4 p-4 rounded-lg border cursor-pointer transition-all ${
+                  className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
                     selectedMethodId === method.id
-                      ? "border-primary bg-primary/10"
-                      : "border-border hover:border-primary/50"
+                      ? "border-primary bg-primary/10 shadow-sm"
+                      : "border-border hover:border-primary/50 hover:bg-secondary/50"
                   }`}
                 >
                   <RadioGroupItem value={method.id} id={method.id} />
-                  <Icon className="w-5 h-5 text-primary" />
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                    selectedMethodId === method.id ? "bg-primary/20" : "bg-secondary"
+                  }`}>
+                    <Icon className="w-4 h-4 text-primary" />
+                  </div>
                   <div>
                     <p className="font-medium">{method.name}</p>
-                    <p className="text-sm text-muted-foreground capitalize">{method.typeMethod.replace('_', ' ')}</p>
+                    <p className="text-xs text-muted-foreground capitalize">{method.typeMethod.replace('_', ' ')}</p>
                   </div>
                 </Label>
               )})}
@@ -337,26 +361,26 @@ const RechargeDialog = ({ open, onOpenChange }: RechargeDialogProps) => {
                 )}
 
                 {currentBalance !== null && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                        <Wallet className="w-4 h-4" />
-                        <span>{t("recharge.currentBalance")} <span className="font-medium text-foreground">${currentBalance.toFixed(2)}</span></span>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2 px-1">
+                        <Coins className="w-4 h-4 text-primary" />
+                        <span>{t("recharge.currentBalance")} <span className="font-semibold text-foreground">{Math.round(currentBalance * 100)} pts</span></span>
                     </div>
                 )}
               </div>
 
               {amountNum >= 1 && (
-                <div className="p-4 bg-primary/10 rounded-lg border border-primary/30">
+                <div className="p-4 bg-primary/10 rounded-2xl border border-primary/20">
                   <div className="flex flex-col gap-2">
                     <div className="flex justify-between items-center">
-                        <span>{t("recharge.youWillReceive")}</span>
-                        <div className="flex items-center gap-2">
-                            <Coins className="w-5 h-5 text-accent" />
-                            <span className="text-xl font-bold text-primary">{pointsEquivalent} {t("dashboard.points")}</span>
+                        <span className="text-sm text-muted-foreground">{t("recharge.youWillReceive")}</span>
+                        <div className="flex items-center gap-1.5">
+                            <Coins className="w-4 h-4 text-primary" />
+                            <span className="text-lg font-bold text-primary">{pointsEquivalent} pts</span>
                         </div>
                     </div>
                     <div className="flex justify-between items-center pt-2 border-t border-primary/20">
-                         <span>{t("recharge.equivalentTo")}</span>
-                         <span className="font-medium text-foreground">{daysEquivalent} {t("recharge.daysOfUse")}</span>
+                         <span className="text-sm text-muted-foreground">{t("recharge.equivalentTo")}</span>
+                         <span className="font-medium text-foreground text-sm">{daysEquivalent} {t("recharge.daysOfUse")}</span>
                     </div>
                   </div>
                 </div>
@@ -507,7 +531,7 @@ const RechargeDialog = ({ open, onOpenChange }: RechargeDialogProps) => {
         {/* Navigation Buttons */}
         <div className="flex gap-3 pt-4">
           {step !== "method" && (
-            <Button variant="outline" onClick={goBack} className="flex-1" disabled={isSubmitting}>
+            <Button variant="outline" onClick={goBack} className="flex-1 rounded-2xl" disabled={isSubmitting}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t("recharge.back")}
             </Button>
@@ -516,13 +540,13 @@ const RechargeDialog = ({ open, onOpenChange }: RechargeDialogProps) => {
             <Button
               onClick={goNext}
               disabled={!canProceed() || isLoadingMethods}
-              className="flex-1 box-glow-green"
+              className="flex-1 rounded-2xl"
             >
               {t("recharge.next")}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           ) : (
-            <Button onClick={handleSubmit} className="flex-1 box-glow-green" disabled={isSubmitting}>
+            <Button onClick={handleSubmit} className="flex-1 rounded-2xl" disabled={isSubmitting}>
               {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
