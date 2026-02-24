@@ -107,16 +107,6 @@ const Hero = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-3 md:p-4 bg-secondary/60 rounded-xl transition-colors hover:bg-secondary/80">
-                  <div className="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-5 h-5 text-accent" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{t("pricing.comingSoon")}</p>
-                    <p className="text-xs text-muted-foreground">{t("hero.mockup.newAgents")}</p>
-                  </div>
-                </div>
-                
                 <div className="flex items-center gap-3 p-3 md:p-4 bg-primary/5 rounded-xl border border-primary/10">
                   <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
                     <DollarSign className="w-5 h-5 text-primary" />
