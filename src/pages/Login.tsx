@@ -239,12 +239,20 @@ export default function Login() {
 
               {/* Password field */}
               <div>
-                <label
-                  htmlFor="login-password"
-                  className="block text-sm font-medium text-foreground mb-1.5"
-                >
-                  Contraseña
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label
+                    htmlFor="login-password"
+                    className="block text-sm font-medium text-foreground"
+                  >
+                    Contraseña
+                  </label>
+                  <Link
+                    to="/recovery"
+                    className="text-xs text-primary hover:underline underline-offset-4 transition-colors"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </div>
                 <input
                   id="login-password"
                   type="password"
