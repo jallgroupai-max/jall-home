@@ -522,9 +522,9 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <span className="text-2xl font-bold text-primary glow-green tracking-tight">
-              Jall<span className="text-foreground">AI</span>
-            </span>
+            <div className="flex items-center gap-2">
+              <img src="/logo.png" alt="JallAI Logo" className="h-8 w-auto" />
+            </div>
 
             {/* Desktop Tab Navigation — MD3 pill indicator */}
             <nav className="hidden md:flex items-center bg-secondary/50 rounded-2xl p-1 gap-0.5">
