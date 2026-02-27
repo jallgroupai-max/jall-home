@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/lib/api";
 import { walletsService } from "@/lib/wallets.service";
 import { paymentsService } from "@/lib/payments.service";
+import ElevenLabsPage from "@/components/elevenlabs/ElevenLabsPage";
 
 type ToolType = "chatgpt" | "elevenlabs" | "aiultra";
 
@@ -460,31 +461,11 @@ const Dashboard = () => {
       );
     }
 
-    // Eleven Labs — Coming Soon
+    // Eleven Labs
     if (activeTab === "elevenlabs") {
       return (
-        <div className="text-center space-y-6 max-w-lg mx-auto">
-          <div className="w-24 h-24 mx-auto bg-primary/15 rounded-3xl flex items-center justify-center shadow-sm">
-            <Mic className="w-12 h-12 text-primary" />
-          </div>
-          <div className="space-y-3">
-            <h2 className="text-2xl font-bold inline-flex items-center justify-center">
-              Eleven Labs
-              <ToolHelpButton tool="elevenlabs" />
-            </h2>
-            <span className="inline-block px-4 py-1.5 bg-accent/10 text-accent font-semibold rounded-full text-sm border border-accent/20">
-              {t("dashboard.comingSoon")}
-            </span>
-          </div>
-          <p className="text-muted-foreground">{t("dashboard.elevenLabsDesc")}</p>
-          <Button
-            onClick={() => setActiveTab("inicio")}
-            variant="outline"
-            size="lg"
-            className="rounded-2xl"
-          >
-            {t("dashboard.backHome")}
-          </Button>
+        <div className="w-full h-[calc(100vh-140px)] max-w-6xl mx-auto">
+          <ElevenLabsPage token={token!} />
         </div>
       );
     }
@@ -672,7 +653,7 @@ const Dashboard = () => {
 
       {/* ─── Main Content ─────────────────────────────── */}
       <main className="pt-24 px-4 pb-16">
-        <div className="max-w-4xl mx-auto">
+        <div className={`max-w-4xl mx-auto ${activeTab === 'elevenlabs' ? 'max-w-none' : ''}`}>
           {renderContent()}
         </div>
       </main>
