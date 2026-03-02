@@ -46,10 +46,10 @@ jobs:
             if [ ! -d ".git" ]; then
                 echo "Carpeta no es un repositorio git o está sucia. Limpiando y clonando..."
                 rm -rf * .[!.]* || true
-                git clone -b $BRANCH https://x-access-token:${{ secrets.TOKEN }}@github.com/${{ github.repository }}.git .
+                git clone -b $BRANCH https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git .
             else
                 # Actualizar URL con token
-                git remote set-url origin https://x-access-token:${{ secrets.TOKEN }}@github.com/${{ github.repository }}.git
+                git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
                 git fetch origin $BRANCH
                 git reset --hard origin/$BRANCH
             fi
