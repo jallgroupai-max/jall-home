@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
+import HowItWorks from "@/components/landing/HowItWorks";
 import ProblemSolution from "@/components/landing/ProblemSolution";
 import Benefits from "@/components/landing/Benefits";
 import Pricing from "@/components/landing/Pricing";
@@ -27,6 +28,7 @@ const Index = () => {
       <Navbar />
       <main>
         <Hero />
+        <HowItWorks />
         <ProblemSolution />
         <Benefits />
         <Pricing />

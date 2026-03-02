@@ -1,7 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { Sparkles, Play, DollarSign, ArrowRight } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Sparkles, Play, ArrowRight, Gift, Mic } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Hero = () => {
   const { t, isVenezuela } = useLanguage();
@@ -20,6 +21,19 @@ const Hero = () => {
       className="min-h-[calc(100vh-4rem)] flex items-center justify-center pt-24 md:pt-20 pb-8 md:py-16 px-4"
     >
       <div className="max-w-6xl mx-auto w-full">
+        {/* Registration incentive banner */}
+        <div className="mb-8 p-4 rounded-2xl border border-primary/20 bg-primary/5 flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left animate-fade-in-up">
+          <Gift className="w-5 h-5 text-primary shrink-0" />
+          <p className="text-sm text-muted-foreground">
+            <span className="text-primary font-semibold">{t("hero.bonus.title")}</span>{" "}
+            {t("hero.bonus.desc")}
+          </p>
+          <Button size="sm" onClick={() => navigate("/register")} className="shrink-0 gap-1.5">
+            {t("hero.bonus.cta")}
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           {/* Left Content */}
           <div className="space-y-6 animate-fade-in-up">
@@ -30,6 +44,10 @@ const Hero = () => {
               </div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 border border-accent/15 text-xs text-accent font-medium">
                 {t("hero.badge.noVpn")}
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/15 text-xs text-primary font-medium">
+                <Gift className="w-3 h-3" />
+                {t("hero.badge.freePoints")}
               </div>
             </div>
             
@@ -47,7 +65,7 @@ const Hero = () => {
               <Button
                 size="lg"
                 onClick={() => navigate("/register")}
-                className="text-base px-6 gap-2"
+                className="text-base px-6 gap-2 box-glow-cyan"
               >
                 {t("hero.registerFree")}
                 <ArrowRight className="w-4 h-4" />
@@ -107,13 +125,23 @@ const Hero = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-3 md:p-4 bg-primary/5 rounded-xl border border-primary/10">
+                <div className="flex items-center gap-3 p-3 md:p-4 bg-secondary/60 rounded-xl transition-colors hover:bg-secondary/80">
                   <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                    <DollarSign className="w-5 h-5 text-primary" />
+                    <Mic className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-primary text-sm">{isVenezuela ? t("hero.mockup.paymentBs") : t("hero.mockup.paymentFlex")}</p>
-                    <p className="text-xs text-muted-foreground">{isVenezuela ? t("hero.mockup.noIntCard") : t("hero.mockup.payAsYouGo")}</p>
+                    <p className="font-medium text-sm">Eleven Labs</p>
+                    <p className="text-xs text-muted-foreground">{t("hero.mockup.elevenLabs")}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 md:p-4 bg-primary/5 rounded-xl border border-primary/10">
+                  <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                    <Gift className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-primary text-sm">{t("hero.mockup.bonusTitle")}</p>
+                    <p className="text-xs text-muted-foreground">{t("hero.mockup.bonusDesc")}</p>
                   </div>
                 </div>
               </div>
@@ -126,7 +154,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-
     </section>
   );
 };
