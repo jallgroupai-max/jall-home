@@ -25,8 +25,8 @@ const Benefits = () => {
     },
     {
       icon: Wallet,
-      titleKey: isVenezuela ? "benefits.payment.title" : "benefits.payment.titleGlobal",
-      descKey: isVenezuela ? "benefits.payment.desc" : "benefits.payment.descGlobal",
+      titleKey: isVenezuela ? "benefits.payment.title" : "benefits.payment.title",
+      descKey: isVenezuela ? "benefits.payment.desc" : "benefits.payment.desc",
       color: "accent" as const,
     },
   ];

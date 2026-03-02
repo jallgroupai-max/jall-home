@@ -6,7 +6,7 @@ const Testimonials = () => {
 
   const testimonials = [
     { name: "María González", roleKey: "testimonials.role.creator", avatar: "MG", quoteKey: "testimonials.quote1", rating: 5 },
-    { name: "Carlos Rodríguez", roleKey: "testimonials.role.entrepreneur", avatar: "CR", quoteKey: isVenezuela ? "testimonials.quote2" : "testimonials.quote2.global", rating: 5 },
+    { name: "Carlos Rodríguez", roleKey: "testimonials.role.entrepreneur", avatar: "CR", quoteKey: isVenezuela ? "testimonials.quote2" : "testimonials.quote2", rating: 5 },
     { name: "Ana Martínez", roleKey: "testimonials.role.cm", avatar: "AM", quoteKey: "testimonials.quote3", rating: 5 },
     { name: "Luis Pérez", roleKey: "testimonials.role.youtuber", avatar: "LP", quoteKey: "testimonials.quote4", rating: 5 },
   ];
