@@ -53,6 +53,21 @@ export const translations = {
     "hero.bonus.desc": "150 puntos para usar todas las herramientas + 10,000 créditos para generar voces con IA. Solo confirma tu correo.",
     "hero.bonus.cta": "Reclamar mis puntos",
 
+    // How It Works
+    "howItWorks.title": "Empieza en",
+    "howItWorks.titleHighlight": "3 simples pasos",
+    "howItWorks.subtitle": "No necesitas descargar nada, no necesitas VPN. Solo tu correo y listo.",
+    "howItWorks.step1.title": "Crea tu cuenta gratis",
+    "howItWorks.step1.desc": "Solo necesitas un correo electrónico. Te toma menos de 30 segundos. No pedimos tarjeta ni datos de pago.",
+    "howItWorks.step2.title": "Confirma tu correo y recibe tu regalo",
+    "howItWorks.step2.desc": "Abre el enlace que te enviamos a tu correo. Al confirmarlo, recibes 150 puntos + 10,000 créditos para voces con IA. ¡Todo gratis!",
+    "howItWorks.step3.title": "¡Listo! Empieza a usar la IA",
+    "howItWorks.step3.desc": "Entra desde tu celular o computadora, abre el navegador y ya puedes usar ChatGPT, crear videos y generar voces. Así de fácil.",
+    "howItWorks.noDownload": "No se instala nada en tu dispositivo",
+    "howItWorks.mobileOrPc": "Funciona en celular y computadora",
+    "howItWorks.cta": "Crear mi cuenta gratis",
+    "howItWorks.noCreditCard": "Sin tarjeta de crédito • Recibes 150 puntos al registrarte",
+
     // Problem Solution
     "problem.title": "¿Cansado de las",
     "problem.titleHighlight": "Suscripciones Costosas",
@@ -101,6 +116,8 @@ export const translations = {
     "pricing.fortnightDesc": "Proyecto extendido",
     "pricing.monthDesc": "Creador serio",
     "pricing.mostPopular": "Más Popular",
+    "pricing.comingSoon": "🚀 Próximamente",
+    "pricing.newAgents": "Nuevas herramientas de IA estarán disponibles muy pronto. ¡Mantente atento!",
     "pricing.instantAccess": "Acceso inmediato",
     "pricing.paymentBs": "Pago en bolívares",
     "pricing.paymentFlex": "Pago flexible",
@@ -148,6 +165,8 @@ export const translations = {
     "faq.a5": "¡Todo se hace internamente en nuestra plataforma! No necesitas VPN, correos adicionales ni claves complejas. Solo tu acceso a Jall AI y las ideas para crear. Así de simple.",
     "faq.q6": "¿Las cuentas son compartidas? ¿Qué pasa con mi privacidad?",
     "faq.a6": "Sí, las herramientas funcionan con cuentas compartidas, lo que nos permite ofrecerte precios tan accesibles. Sin embargo, valoramos mucho tu privacidad y trabajamos constantemente para proteger tus creaciones. Tu contenido es tuyo y nos comprometemos a respetar la confidencialidad de tu trabajo.",
+    "faq.q7": "¿Qué son los puntos de uso?",
+    "faq.a7": "Los puntos son tu saldo dentro de Jall AI. Cada herramienta consume puntos según el tiempo que la uses. 100 puntos equivalen a $1 USD. Al registrarte y confirmar tu correo, recibes 150 puntos gratis + 10,000 créditos para generar voces con IA. Todo sin compromiso.",
 
     // Footer
     "footer.description": "Suite creativa completa para creadores. Accede a las mejores herramientas de IA pagando en bolívares.",
@@ -440,6 +459,21 @@ export const translations = {
     "hero.bonus.desc": "150 points to use all tools + 10,000 credits to generate AI voices. Just confirm your email.",
     "hero.bonus.cta": "Claim my points",
 
+    // How It Works
+    "howItWorks.title": "Start in",
+    "howItWorks.titleHighlight": "3 simple steps",
+    "howItWorks.subtitle": "No downloads needed, no VPN required. Just your email and you're ready.",
+    "howItWorks.step1.title": "Create your free account",
+    "howItWorks.step1.desc": "All you need is an email address. Takes less than 30 seconds. No credit card or payment info required.",
+    "howItWorks.step2.title": "Confirm your email & get your gift",
+    "howItWorks.step2.desc": "Open the link we send to your email. Once confirmed, you get 150 points + 10,000 credits for AI voices. All free!",
+    "howItWorks.step3.title": "Done! Start using AI",
+    "howItWorks.step3.desc": "Open your browser on your phone or computer and start using ChatGPT, creating videos and generating voices. That easy.",
+    "howItWorks.noDownload": "Nothing to install on your device",
+    "howItWorks.mobileOrPc": "Works on phone and computer",
+    "howItWorks.cta": "Create my free account",
+    "howItWorks.noCreditCard": "No credit card required • Get 150 points on signup",
+
     // Problem Solution
     "problem.title": "Tired of",
     "problem.titleHighlight": "Expensive Subscriptions",
@@ -488,6 +522,8 @@ export const translations = {
     "pricing.fortnightDesc": "Extended project",
     "pricing.monthDesc": "Serious creator",
     "pricing.mostPopular": "Most Popular",
+    "pricing.comingSoon": "🚀 Coming Soon",
+    "pricing.newAgents": "New AI tools will be available very soon. Stay tuned!",
     "pricing.instantAccess": "Instant access",
     "pricing.paymentBs": "Payment in bolivars",
     "pricing.paymentFlex": "Flexible payment",
@@ -535,6 +571,8 @@ export const translations = {
     "faq.a5": "Everything is done internally on our platform! You don't need VPN, additional emails or complex passwords. Just your Jall AI access and ideas to create. That simple.",
     "faq.q6": "Are accounts shared? What about my privacy?",
     "faq.a6": "Yes, the tools work with shared accounts, which allows us to offer you such affordable prices. However, we greatly value your privacy and constantly work to protect your creations. Your content is yours and we are committed to respecting the confidentiality of your work.",
+    "faq.q7": "What are usage points?",
+    "faq.a7": "Points are your balance inside Jall AI. Each tool uses points based on how long you use it. 100 points equal $1 USD. When you sign up and confirm your email, you get 150 free points + 10,000 credits for AI voices. All with no strings attached.",
 
     // Footer
     "footer.description": "Complete creative suite for creators. Access the best AI tools with flexible payments.",
