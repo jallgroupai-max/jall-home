@@ -419,7 +419,7 @@ const Dashboard = () => {
 
       const price = chatGPTProvider?.finalPrice || 0;
       const priceInCoins = toCoins(price);
-      const canAfford = balance >= price;
+      const canAfford = toCoins(balance) >= priceInCoins;
 
       return (
         <div className="text-center space-y-6 max-w-lg mx-auto">
@@ -442,7 +442,9 @@ const Dashboard = () => {
                 <Coins className="w-3.5 h-3.5" />
                 {priceInCoins} pts
               </span>
-              <span className="text-xs text-muted-foreground">por 30 días</span>
+              <span className="text-xs text-muted-foreground">
+                {priceInCoins === 30 ? "por 1 día" : "por 30 días"}
+              </span>
             </div>
           )}
           <Button
