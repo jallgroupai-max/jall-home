@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
-import { Coins, Home, Sparkles, Play, Mic, Menu, X, Plus, MessageSquarePlus, Clock, HelpCircle, Sun, Moon, FileText, Zap } from "lucide-react";
+import { Coins, Home, Sparkles, Play, Mic, Menu, X, Plus, MessageSquarePlus, Clock, HelpCircle, Sun, Moon, Zap, GitBranch, Bot } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -25,7 +24,8 @@ import { walletsService } from "@/lib/wallets.service";
 import { paymentsService } from "@/lib/payments.service";
 import ElevenLabsPage from "@/components/elevenlabs/ElevenLabsPage";
 
-type ToolType = "chatgpt" | "elevenlabs" | "aiultra";
+type HelpToolType = "chatgpt" | "elevenlabs" | "aiultra";
+type ActivationToolType = "texttools" | "chatgpt" | "grok" | "elevenlabs" | "aiultra";
 
 type Provider = {
   id: string;
@@ -51,12 +51,25 @@ type UserAccount = {
   account: Account;
 };
 
+type TabType = "inicio" | "texttools" | "elevenlabs" | "aiultra";
+
+type ProviderAccess = {
+  redirectUrl?: string;
+  accessToken?: string;
+};
+
+type TextToolsMembershipProps = {
+  membershipEnd: Date | null;
+  chatGPTAccess: ProviderAccess;
+  grokAccess: ProviderAccess;
+};
+
 /** Convert dollar balance to coins (1 USD = 100 pts) */
 const toCoins = (balance: number) => Math.round(balance * 100);
 const formatCoins = (coins: number) =>
   coins >= 1000 ? `${(coins / 1000).toFixed(1)}K pts` : `${coins} pts`;
 
-const ToolHelpButton = ({ tool }: { tool: ToolType }) => {
+const ToolHelpButton = ({ tool }: { tool: HelpToolType }) => {
   const { t } = useLanguage();
   const [isAnimating, setIsAnimating] = useState(true);
 
@@ -65,7 +78,7 @@ const ToolHelpButton = ({ tool }: { tool: ToolType }) => {
     return () => clearTimeout(timer);
   }, []);
 
-  const features: Record<ToolType, string[]> = {
+  const features: Record<HelpToolType, string[]> = {
     chatgpt: [
       t("toolHelp.chatgpt.1"),
       t("toolHelp.chatgpt.2"),
@@ -94,7 +107,7 @@ const ToolHelpButton = ({ tool }: { tool: ToolType }) => {
     ],
   };
 
-  const titles: Record<ToolType, string> = {
+  const titles: Record<HelpToolType, string> = {
     chatgpt: t("toolHelp.chatgpt.title"),
     elevenlabs: t("toolHelp.elevenlabs.title"),
     aiultra: t("toolHelp.aiultra.title"),
@@ -105,8 +118,8 @@ const ToolHelpButton = ({ tool }: { tool: ToolType }) => {
       <PopoverTrigger asChild>
         <button
           className={`
-            relative inline-flex items-center justify-center w-6 h-6 rounded-full 
-            border border-primary/30 bg-primary/10 text-primary 
+            relative inline-flex items-center justify-center w-6 h-6 rounded-full
+            border border-primary/30 bg-primary/10 text-primary
             hover:bg-primary/20 hover:border-primary/50 transition-all ml-2
             ${isAnimating ? "animate-help-pulse" : ""}
           `}
@@ -137,15 +150,7 @@ const ToolHelpButton = ({ tool }: { tool: ToolType }) => {
   );
 };
 
-type TabType = "inicio" | "chatgpt" | "elevenlabs" | "aiultra";
-
-type ChatGPTMembershipProps = {
-  membershipEnd: Date;
-  redirectUrl?: string;
-  accessToken?: string;
-};
-
-const ChatGPTMembership = ({ membershipEnd, redirectUrl, accessToken }: ChatGPTMembershipProps) => {
+const TextToolsMembership = ({ membershipEnd, chatGPTAccess, grokAccess }: TextToolsMembershipProps) => {
   const { t } = useLanguage();
   const [timeRemaining, setTimeRemaining] = useState("");
 
@@ -163,20 +168,24 @@ const ChatGPTMembership = ({ membershipEnd, redirectUrl, accessToken }: ChatGPTM
   };
 
   useEffect(() => {
+    if (!membershipEnd) {
+      setTimeRemaining(t("dashboard.expired"));
+      return;
+    }
+
     setTimeRemaining(formatTimeRemaining(membershipEnd));
     const interval = setInterval(() => setTimeRemaining(formatTimeRemaining(membershipEnd)), 1000);
     return () => clearInterval(interval);
-  }, [membershipEnd]);
+  }, [membershipEnd, t]);
 
   return (
     <div className="text-center space-y-6 max-w-lg mx-auto">
-      {/* MD3 tonal icon container */}
       <div className="w-24 h-24 mx-auto bg-primary/15 rounded-3xl flex items-center justify-center shadow-sm">
-        <Sparkles className="w-12 h-12 text-primary" />
+        <GitBranch className="w-12 h-12 text-primary" />
       </div>
       <div className="space-y-3">
         <h2 className="text-2xl font-bold inline-flex items-center justify-center">
-          ChatGPT Plus
+          {t("dashboard.textToolsTitle")}
           <ToolHelpButton tool="chatgpt" />
         </h2>
         <div className="flex justify-center">
@@ -186,7 +195,6 @@ const ChatGPTMembership = ({ membershipEnd, redirectUrl, accessToken }: ChatGPTM
         </div>
       </div>
 
-      {/* Countdown Timer — MD3 outlined surface */}
       <div className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-secondary/60 border border-border/50">
         <Clock className="w-5 h-5 text-primary" />
         <span className="text-muted-foreground text-sm">{t("dashboard.timeRemaining")}</span>
@@ -194,22 +202,38 @@ const ChatGPTMembership = ({ membershipEnd, redirectUrl, accessToken }: ChatGPTM
       </div>
 
       <div className="bg-primary/8 border border-primary/15 p-4 rounded-2xl text-sm text-primary animate-fade-in">
-        <p className="font-medium">✨ {t("dashboard.fullAccess")}</p>
+        <p className="font-medium">✨ {t("dashboard.fullAccessTextTools")}</p>
       </div>
 
-      <Button
-        className="w-full h-12 bg-primary hover:opacity-90 font-bold tracking-wide rounded-2xl shadow-md"
-        size="lg"
-        asChild
-      >
-        <a
-          href={(redirectUrl || "https://gpt.jall.lat") + (accessToken ? `?token=${accessToken}` : "")}
-          target="_blank"
-          rel="noopener noreferrer"
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Button
+          className="w-full h-12 bg-primary hover:opacity-90 font-bold tracking-wide rounded-2xl shadow-md"
+          size="lg"
+          asChild
         >
-          {t("dashboard.openChatGPT")}
-        </a>
-      </Button>
+          <a
+            href={(chatGPTAccess.redirectUrl || "https://gpt.jall.lat") + (chatGPTAccess.accessToken ? `?token=${chatGPTAccess.accessToken}` : "")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t("dashboard.openChatGPT")}
+          </a>
+        </Button>
+
+        <Button
+          className="w-full h-12 bg-primary hover:opacity-90 font-bold tracking-wide rounded-2xl shadow-md"
+          size="lg"
+          asChild
+        >
+          <a
+            href={(grokAccess.redirectUrl || "https://grokia.jall.lat") + (grokAccess.accessToken ? `?token=${grokAccess.accessToken}` : "")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t("dashboard.openGrok")}
+          </a>
+        </Button>
+      </div>
     </div>
   );
 };
@@ -292,26 +316,29 @@ const Dashboard = () => {
     }
   }, [user, token, showRechargeDialog]);
 
-  const handleActivate = async (tool: ToolType) => {
+  const handleActivate = async (tool: ActivationToolType) => {
     if (!user || !token) return;
-    const providerTypeMap: Record<ToolType, string> = {
+
+    const providerTypeMap: Record<ActivationToolType, string> = {
+      texttools: "ChatGPT",
       chatgpt: "ChatGPT",
+      grok: "Grok",
       elevenlabs: "ElevenLabs",
-      aiultra: "AIUltra",
+      aiultra: "Google AI Ultra",
     };
-    const provider = providers.find(
-      (p) => p.typeProvider === providerTypeMap[tool] || (tool === "chatgpt" && p.typeProvider === "ChatGPT")
-    );
+
+    const provider = providers.find((p) => p.typeProvider === providerTypeMap[tool]);
+
     if (!provider) {
       toast({ title: "Error", description: "Provider not found", variant: "destructive" });
       return;
     }
+
     setLoadingTool(true);
     try {
       await apiService.post("/user-accounts/assign", { userId: user.id, providerId: provider.id }, token);
       toast({ title: "¡Activado!", description: "Membresía activada exitosamente.", variant: "default" });
       await Promise.all([fetchWallet(), fetchUserAccounts()]);
-      if (provider.redirectUrl) window.open(provider.redirectUrl, "_blank");
     } catch (error: any) {
       if (error.message?.includes("saldo") || error.message?.includes("balance")) {
         toast({ title: "Saldo insuficiente", description: "Por favor recarga tu saldo.", variant: "destructive" });
@@ -324,7 +351,11 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = () => { logout(); navigate("/"); };
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   const handleRecharge = () => setShowRechargeDialog(true);
 
   const coins = toCoins(balance);
@@ -332,7 +363,7 @@ const Dashboard = () => {
 
   const tabs = [
     { id: "inicio" as TabType, label: t("dashboard.home"), icon: Home },
-    { id: "chatgpt" as TabType, label: "ChatGPT", icon: Sparkles },
+    { id: "texttools" as TabType, label: t("dashboard.textToolsNav"), icon: GitBranch },
     { id: "elevenlabs" as TabType, label: "Eleven Labs", icon: Mic },
     { id: "aiultra" as TabType, label: "AI Ultra", icon: Play },
   ];
@@ -341,19 +372,15 @@ const Dashboard = () => {
     if (activeTab === "inicio") {
       return (
         <div className="text-center space-y-8">
-          {/* Welcome hero */}
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold border border-primary/20 mb-2">
               <Zap className="w-3 h-3" />
               Panel de control
             </div>
             <h2 className="text-3xl font-bold">{t("dashboard.welcome")}</h2>
-            <p className="text-muted-foreground text-lg max-w-md mx-auto">
-              {t("dashboard.selectTool")}
-            </p>
+            <p className="text-muted-foreground text-lg max-w-md mx-auto">{t("dashboard.selectTool")}</p>
           </div>
 
-          {/* Tool cards — MD3 elevated surfaces */}
           <div className="grid sm:grid-cols-3 gap-4 max-w-2xl mx-auto mt-6">
             {tabs.slice(1).map((tab) => (
               <button
@@ -361,19 +388,28 @@ const Dashboard = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className="group relative p-6 bg-card border border-border/60 rounded-3xl hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 text-left overflow-hidden"
               >
-                {/* Background glow on hover */}
                 <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/3 transition-colors duration-300 rounded-3xl" />
-                {/* Tonal icon container */}
                 <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors duration-300">
                   <tab.icon className="w-6 h-6 text-primary" />
                 </div>
                 <p className="font-semibold text-foreground relative z-10">{tab.label}</p>
+                {tab.id === "texttools" && (
+                  <div className="relative z-10 mt-2 flex items-center gap-2">
+                    <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20 text-[11px] text-foreground">
+                      <Sparkles className="w-3.5 h-3.5 text-primary" />
+                      ChatGPT
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20 text-[11px] text-foreground">
+                      <Bot className="w-3.5 h-3.5 text-primary" />
+                      Grok
+                    </div>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground mt-1 relative z-10">Acceder ahora →</p>
               </button>
             ))}
           </div>
 
-          {/* Coins balance card */}
           <div
             onClick={handleRecharge}
             className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-accent/10 border border-accent/20 cursor-pointer hover:bg-accent/20 transition-colors duration-200 group"
@@ -393,77 +429,82 @@ const Dashboard = () => {
 
     const toolNames: Record<TabType, string> = {
       inicio: "",
-      chatgpt: "ChatGPT Plus",
+      texttools: t("dashboard.textToolsTitle"),
       elevenlabs: "Eleven Labs",
       aiultra: "Google AI Ultra",
     };
 
-    // ChatGPT Logic
-    if (activeTab === "chatgpt") {
+    if (activeTab === "texttools") {
       const chatGPTProvider = providers.find((p) => p.typeProvider === "ChatGPT");
-      const activeAccount = userAccounts
-        .filter((ua) => ua.active && ua.account?.provider?.typeProvider === "ChatGPT")
-        .sort((a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime())
-        .find((ua) => new Date(ua.expiresAt) > new Date());
-      const isActive = activeAccount && new Date(activeAccount.expiresAt) > new Date();
+      const grokProvider = providers.find((p) => p.typeProvider === "Grok");
 
-      if (isActive && activeAccount) {
+      const getActiveAccountFor = (providerType: string) =>
+        userAccounts
+          .filter((ua) => ua.active && ua.account?.provider?.typeProvider === providerType)
+          .sort((a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime())
+          .find((ua) => new Date(ua.expiresAt) > new Date());
+
+      const activeChatGPT = getActiveAccountFor("ChatGPT");
+      const activeGrok = getActiveAccountFor("Grok");
+      const isActive = !!activeChatGPT || !!activeGrok;
+
+      if (isActive) {
+        const latestExpiration = [activeChatGPT?.expiresAt, activeGrok?.expiresAt]
+          .filter(Boolean)
+          .map((expiresAt) => new Date(expiresAt as string))
+          .sort((a, b) => b.getTime() - a.getTime())[0] || null;
+
         return (
-          <ChatGPTMembership
-            membershipEnd={new Date(activeAccount.expiresAt)}
-            redirectUrl={activeAccount.account.provider.redirectUrl}
-            accessToken={activeAccount.accessToken}
+          <TextToolsMembership
+            membershipEnd={latestExpiration}
+            chatGPTAccess={{
+              redirectUrl: activeChatGPT?.account.provider.redirectUrl || chatGPTProvider?.redirectUrl,
+              accessToken: activeChatGPT?.accessToken,
+            }}
+            grokAccess={{
+              redirectUrl: activeGrok?.account.provider.redirectUrl || grokProvider?.redirectUrl,
+              accessToken: activeGrok?.accessToken,
+            }}
           />
         );
       }
 
-      const price = chatGPTProvider?.finalPrice || 0;
-      const priceInCoins = toCoins(price);
+      const priceInCoins = 30;
       const canAfford = toCoins(balance) >= priceInCoins;
 
       return (
         <div className="text-center space-y-6 max-w-lg mx-auto">
           <div className="w-24 h-24 mx-auto bg-accent/15 rounded-3xl flex items-center justify-center shadow-sm">
-            <Sparkles className="w-12 h-12 text-accent" />
+            <GitBranch className="w-12 h-12 text-accent" />
           </div>
           <h2 className="text-2xl font-bold inline-flex items-center justify-center">
-            {t("dashboard.noAccess")} ChatGPT Plus
+            {t("dashboard.noAccess")} {t("dashboard.textToolsTitle")}
             <ToolHelpButton tool="chatgpt" />
           </h2>
           <p className="text-muted-foreground">
             {canAfford
-              ? t("dashboard.activateAccess").replace("$0.30", `${priceInCoins} pts`)
+              ? t("dashboard.activateTextToolsAccess").replace("$0.30", `${priceInCoins} pts`)
               : t("dashboard.noAccessDesc")}
           </p>
-          {/* Price chip */}
-          {chatGPTProvider && (
-            <div className="flex items-center justify-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20">
-                <Coins className="w-3.5 h-3.5" />
-                {priceInCoins} pts
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {priceInCoins === 30 ? "por 1 día" : "por 30 días"}
-              </span>
-            </div>
-          )}
+          <div className="flex items-center justify-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20">
+              <Coins className="w-3.5 h-3.5" />
+              {priceInCoins} pts
+            </span>
+            <span className="text-xs text-muted-foreground">por 1 día</span>
+          </div>
           <Button
-            onClick={() => (canAfford ? handleActivate("chatgpt") : handleRecharge())}
+            onClick={() => (canAfford ? handleActivate("texttools") : handleRecharge())}
             className="w-full h-12 rounded-2xl font-bold shadow-md"
             size="lg"
             disabled={loadingTool}
           >
-            {loadingTool
-              ? t("dashboard.activating")
-              : canAfford
-              ? t("dashboard.activatePlan")
-              : t("dashboard.rechargeNow")}
+            {loadingTool ? t("dashboard.activating") : canAfford ? t("dashboard.activatePlan") : t("dashboard.rechargeNow")}
           </Button>
         </div>
       );
     }
 
-    // Eleven Labs
     if (activeTab === "elevenlabs") {
       return (
         <div className="w-full h-[calc(100vh-140px)] max-w-6xl mx-auto">
@@ -472,7 +513,6 @@ const Dashboard = () => {
       );
     }
 
-    // AI Ultra — Coming Soon
     return (
       <div className="text-center space-y-6 max-w-lg mx-auto">
         <div className="w-24 h-24 mx-auto bg-accent/15 rounded-3xl flex items-center justify-center shadow-sm">
@@ -486,12 +526,7 @@ const Dashboard = () => {
           {t("dashboard.comingSoon")}
         </span>
         <p className="text-muted-foreground">{t("dashboard.aiultraDesc")}</p>
-        <Button
-          onClick={() => setActiveTab("inicio")}
-          variant="outline"
-          size="lg"
-          className="rounded-2xl"
-        >
+        <Button onClick={() => setActiveTab("inicio")} variant="outline" size="lg" className="rounded-2xl">
           {t("dashboard.backHome")}
         </Button>
       </div>
@@ -500,16 +535,13 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* ─── Header / Navbar ─────────────────────────────── */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
             <div className="flex items-center gap-2">
               <img src="/logo.png" alt="JallAI Logo" className="h-8 w-auto" />
             </div>
 
-            {/* Desktop Tab Navigation — MD3 pill indicator */}
             <nav className="hidden md:flex items-center bg-secondary/50 rounded-2xl p-1 gap-0.5">
               {tabs.map((tab) => (
                 <button
@@ -527,9 +559,7 @@ const Dashboard = () => {
               ))}
             </nav>
 
-            {/* Right actions */}
             <div className="hidden md:flex items-center gap-3">
-              {/* Coins balance pill */}
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <button
@@ -575,7 +605,6 @@ const Dashboard = () => {
               </Button>
             </div>
 
-            {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 rounded-xl hover:bg-secondary transition-colors text-foreground"
@@ -584,10 +613,8 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {/* ─── Mobile Menu ─────────────────────────── */}
           {mobileMenuOpen && (
             <div className="md:hidden pb-4 space-y-2 animate-fade-in border-t border-border/50 pt-3">
-              {/* Balance card */}
               <div className="flex items-center justify-between px-3 py-2.5 bg-primary/10 border border-primary/20 rounded-2xl">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -603,16 +630,16 @@ const Dashboard = () => {
                 </Button>
               </div>
 
-              {/* Tab links */}
               <div className="space-y-1">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      setMobileMenuOpen(false);
+                    }}
                     className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-colors text-sm font-medium ${
-                      activeTab === tab.id
-                        ? "bg-primary/10 text-primary"
-                        : "text-foreground/80 hover:bg-secondary"
+                      activeTab === tab.id ? "bg-primary/10 text-primary" : "text-foreground/80 hover:bg-secondary"
                     }`}
                   >
                     <tab.icon className="w-4 h-4" />
@@ -625,7 +652,10 @@ const Dashboard = () => {
                 <AccountMenu
                   email={user?.email || ""}
                   onLogout={handleLogout}
-                  onRecharge={() => { setMobileMenuOpen(false); handleRecharge(); }}
+                  onRecharge={() => {
+                    setMobileMenuOpen(false);
+                    handleRecharge();
+                  }}
                   pendingOrdersCount={pendingOrdersCount}
                   className="w-full justify-start px-3"
                 />
@@ -641,7 +671,10 @@ const Dashboard = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => { setMobileMenuOpen(false); setShowFeedbackDialog(true); }}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setShowFeedbackDialog(true);
+                  }}
                   className="w-full justify-start gap-2 px-3 rounded-xl"
                 >
                   <MessageSquarePlus className="h-4 w-4" />
@@ -653,14 +686,12 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {/* ─── Main Content ─────────────────────────────── */}
       <main className="pt-24 px-4 pb-16">
-        <div className={`max-w-4xl mx-auto ${activeTab === 'elevenlabs' ? 'max-w-none' : ''}`}>
+        <div className={`max-w-4xl mx-auto ${activeTab === "elevenlabs" ? "max-w-none" : ""}`}>
           {renderContent()}
         </div>
       </main>
 
-      {/* Dialogs */}
       <RechargeDialog open={showRechargeDialog} onOpenChange={setShowRechargeDialog} />
       <FeedbackDialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog} />
     </div>
