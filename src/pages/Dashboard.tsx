@@ -153,6 +153,7 @@ const ToolHelpButton = ({ tool }: { tool: HelpToolType }) => {
 const TextToolsMembership = ({ membershipEnd, chatGPTAccess, grokAccess }: TextToolsMembershipProps) => {
   const { t } = useLanguage();
   const [timeRemaining, setTimeRemaining] = useState("");
+  const sharedAccessToken = grokAccess.accessToken || chatGPTAccess.accessToken;
 
   const formatTimeRemaining = (endDate: Date): string => {
     const now = new Date();
@@ -226,7 +227,7 @@ const TextToolsMembership = ({ membershipEnd, chatGPTAccess, grokAccess }: TextT
           asChild
         >
           <a
-            href={(grokAccess.redirectUrl || "https://grokia.jall.lat") + (grokAccess.accessToken ? `?token=${grokAccess.accessToken}` : "")}
+            href={(grokAccess.redirectUrl || "https://grokia.jall.lat") + (sharedAccessToken ? `?token=${sharedAccessToken}` : "")}
             target="_blank"
             rel="noopener noreferrer"
           >
