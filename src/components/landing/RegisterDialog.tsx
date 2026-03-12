@@ -70,6 +70,9 @@ const RegisterDialog = ({ open, onOpenChange, onSwitchToLogin }: RegisterDialogP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
+          <div className="mx-auto mb-2">
+            <img src="/logo.png" alt="Jall AI" className="h-8 w-auto" />
+          </div>
           <DialogTitle className="text-2xl text-center">{t("register.title")}</DialogTitle>
           <DialogDescription className="text-center">
             {t("register.subtitle")}
