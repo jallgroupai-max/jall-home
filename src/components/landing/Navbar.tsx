@@ -28,11 +28,9 @@ const Navbar = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <span className="text-xl font-semibold tracking-tight text-foreground">
-              Jall<span className="text-primary"> AI</span>
-            </span>
-          </div>
+          <button onClick={() => navigate("/")} className="flex-shrink-0" aria-label="Go to home">
+            <img src="/logo.png" alt="Jall AI" className="h-8 w-auto" />
+          </button>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-1">

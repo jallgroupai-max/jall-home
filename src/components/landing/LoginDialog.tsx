@@ -113,6 +113,9 @@ const LoginDialog = ({ open, onOpenChange, onSwitchToRegister }: LoginDialogProp
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
+            <div className="mx-auto mb-2">
+              <img src="/logo.png" alt="Jall AI" className="h-8 w-auto" />
+            </div>
             <DialogTitle className="text-2xl text-center">{t("login.title")}</DialogTitle>
             <DialogDescription className="text-center">
               {t("login.subtitle")}

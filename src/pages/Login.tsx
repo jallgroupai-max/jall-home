@@ -122,10 +122,10 @@ export default function Login() {
   /* ─── Render ─────────────────────────────────────────────── */
   return (
     <>
-      <div className="min-h-screen flex bg-background">
+      <div className="min-h-screen flex bg-background animate-fade-in">
         {/* Left panel — decorative */}
         <div
-          className="hidden lg:flex flex-col justify-between w-1/2 p-12 relative overflow-hidden"
+          className="hidden lg:flex flex-col justify-between w-1/2 p-12 relative overflow-hidden animate-fade-in-up [animation-delay:80ms] [animation-fill-mode:both]"
           style={{
             background:
               "linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--primary) / 0.05) 100%)",
@@ -144,9 +144,7 @@ export default function Login() {
           {/* Logo */}
           <div className="relative z-10">
             <Link to="/" className="inline-flex items-center gap-2">
-              <span className="text-2xl font-bold tracking-tight text-foreground">
-                Jall<span className="text-primary">AI</span>
-              </span>
+              <img src="/logo.png" alt="Jall AI" className="h-10 w-auto" />
             </Link>
           </div>
 
@@ -177,14 +175,12 @@ export default function Login() {
         </div>
 
         {/* Right panel — form */}
-        <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
+        <div className="flex-1 flex items-center justify-center p-6 lg:p-12 animate-fade-in-up [animation-delay:140ms] [animation-fill-mode:both]">
           <div className="w-full max-w-md">
             {/* Mobile logo */}
             <div className="lg:hidden mb-8">
               <Link to="/" className="inline-flex items-center gap-2">
-                <span className="text-2xl font-bold tracking-tight text-foreground">
-                  Jall<span className="text-primary">AI</span>
-                </span>
+                <img src="/logo.png" alt="Jall AI" className="h-10 w-auto" />
               </Link>
             </div>
 
