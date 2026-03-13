@@ -11,6 +11,7 @@ import ElevenLabsPage from "@/components/elevenlabs/ElevenLabsPage";
 import DashboardNavbar from "@/components/dashboard/DashboardNavbar";
 import { useToast } from "@/hooks/use-toast";
 import { apiService } from "@/lib/api";
+import { buildProviderLaunchUrl } from "@/lib/provider-links";
 import { walletsService } from "@/lib/wallets.service";
 import { paymentsService } from "@/lib/payments.service";
 import {
@@ -265,10 +266,20 @@ const Dashboard = () => {
     [userAccounts],
   );
 
-  const isGenerativeActive = !!activeChatGPT || !!activeGrok;
+  const activePerplexity = useMemo(
+    () =>
+      userAccounts
+        .filter((ua) => ua.active && ua.account?.provider?.typeProvider === "Perplexity")
+        .sort((a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime())
+        .find((ua) => new Date(ua.expiresAt) > new Date()),
+    [userAccounts],
+  );
+
+  const isGenerativeActive = !!activeChatGPT || !!activeGrok || !!activePerplexity;
   const chatGPTProvider = providers.find((p) => p.typeProvider === "ChatGPT");
   const grokProvider = providers.find((p) => p.typeProvider === "Grok");
-  const sharedAccessToken = activeGrok?.accessToken || activeChatGPT?.accessToken;
+  const perplexityProvider = providers.find((p) => p.typeProvider === "Perplexity");
+  const sharedAccessToken = activePerplexity?.accessToken || activeGrok?.accessToken || activeChatGPT?.accessToken;
 
   const chatGPTAccess: ProviderAccess = {
     redirectUrl: activeChatGPT?.account.provider.redirectUrl || chatGPTProvider?.redirectUrl,
@@ -278,15 +289,16 @@ const Dashboard = () => {
     redirectUrl: activeGrok?.account.provider.redirectUrl || grokProvider?.redirectUrl,
     accessToken: activeGrok?.accessToken,
   };
+  const perplexityAccess: ProviderAccess = {
+    redirectUrl: activePerplexity?.account.provider.redirectUrl || perplexityProvider?.redirectUrl,
+    accessToken: activePerplexity?.accessToken || sharedAccessToken,
+  };
 
-  const chatGPTHref =
-    (chatGPTAccess.redirectUrl || "https://gpt.jall.lat") +
-    (chatGPTAccess.accessToken ? `?token=${chatGPTAccess.accessToken}` : "");
-  const grokHref =
-    (grokAccess.redirectUrl || "https://grokia.jall.lat") +
-    (sharedAccessToken ? `?token=${sharedAccessToken}` : "");
+  const chatGPTHref = buildProviderLaunchUrl("ChatGPT", chatGPTAccess.accessToken, chatGPTAccess.redirectUrl);
+  const grokHref = buildProviderLaunchUrl("Grok", sharedAccessToken, grokAccess.redirectUrl);
+  const perplexityHref = buildProviderLaunchUrl("Perplexity", sharedAccessToken, perplexityAccess.redirectUrl);
 
-  const latestExpiration = [activeChatGPT?.expiresAt, activeGrok?.expiresAt]
+  const latestExpiration = [activeChatGPT?.expiresAt, activeGrok?.expiresAt, activePerplexity?.expiresAt]
     .filter(Boolean)
     .map((expiresAt) => new Date(expiresAt as string))
     .sort((a, b) => b.getTime() - a.getTime())[0];
@@ -352,10 +364,20 @@ const Dashboard = () => {
           <Compass className="w-5 h-5 text-accent" />
         </div>
         <p className="font-semibold text-foreground">Perplexity</p>
-        <p className="text-xs text-muted-foreground mt-1 mb-4">Busqueda asistida con IA</p>
-        <Button variant="outline" className="w-full rounded-xl" disabled>
-          {t("dashboard.comingSoon")}
-        </Button>
+        <p className="text-xs text-muted-foreground mt-1 mb-4">
+          {active ? "Busqueda web asistida con IA y contexto en tiempo real" : "Se habilita al activar IA Generativa"}
+        </p>
+        {active ? (
+          <Button className="w-full rounded-xl" asChild>
+            <a href={perplexityHref} target="_blank" rel="noopener noreferrer">
+              {t("dashboard.openPerplexity")}
+            </a>
+          </Button>
+        ) : (
+          <Button variant="outline" className="w-full rounded-xl" disabled>
+            Activar para usar
+          </Button>
+        )}
       </div>
 
       <div className="surface-1 rounded-3xl border border-border/60 p-5 animate-fade-in-up [animation-delay:320ms] [animation-fill-mode:both]">
