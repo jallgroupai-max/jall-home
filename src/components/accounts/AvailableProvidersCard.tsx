@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, CheckCircle2, TrendingUp, Zap } from 'lucide-react';
+import { Sparkles, Loader2, CheckCircle2, TrendingUp, Zap, Bot, Compass } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { providersService, Provider } from '@/lib/providers.service';
 import { accountsService } from '@/lib/accounts.service';
@@ -99,6 +99,10 @@ export const AvailableProvidersCard = () => {
     switch (type.toLowerCase()) {
       case 'chatgpt':
         return <Sparkles className="w-5 h-5" />;
+      case 'grok':
+        return <Bot className="w-5 h-5" />;
+      case 'perplexity':
+        return <Compass className="w-5 h-5" />;
       case 'elevenlabs':
         return <Zap className="w-5 h-5" />;
       default:
