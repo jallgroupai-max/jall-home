@@ -7,6 +7,14 @@ export interface User {
     surname: string;
     rol: string;
     status: string;
+    authProvider?: string;
+    googleId?: string | null;
+    currentDeviceName?: string | null;
+    lastLoginAt?: string | null;
+    avatar?: {
+        url: string;
+        key: string;
+    } | null;
 }
 
 export interface SignInRequest {
