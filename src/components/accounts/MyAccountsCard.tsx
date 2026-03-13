@@ -8,6 +8,7 @@ import { providersService, Provider } from '@/lib/providers.service';
 import { accountsService, UserAccount } from '@/lib/accounts.service';
 import { walletsService, Wallet } from '@/lib/wallets.service';
 import { useAuth } from '@/contexts/AuthContext';
+import { buildProviderLaunchUrl } from '@/lib/provider-links';
 
 export const MyAccountsCard = () => {
   const { user } = useAuth();
@@ -89,8 +90,9 @@ export const MyAccountsCard = () => {
         description: `Redirigiendo a ${account.email}...`,
       });
 
-      // TODO: Implement redirect to GPT account with token
-      window.open(`https://gpt.jall.lat/?token=${accessToken}`, '_blank');
+      const providerType = account.provider?.typeProvider || 'ChatGPT';
+      const launchUrl = buildProviderLaunchUrl(providerType, accessToken, account.provider?.redirectUrl);
+      window.open(launchUrl || buildProviderLaunchUrl('ChatGPT', accessToken), '_blank');
       
       // Reload accounts to update lastAccessAt
       await loadMyAccounts();
