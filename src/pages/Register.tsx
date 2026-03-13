@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import OtpDialog from "@/components/landing/OtpDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
-import { authService } from "@/lib/auth.service";
 import { apiService } from "@/lib/api";
-import OtpDialog from "@/components/landing/OtpDialog";
+import { authService } from "@/lib/auth.service";
+
+const isGoogleAuthEnabled = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -22,7 +25,6 @@ export default function Register() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  /* ─── Email / Password Register ──────────────────────────── */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -36,23 +38,22 @@ export default function Register() {
     }
 
     setIsLoading(true);
+
     try {
       await apiService.post("/users", { email, password, name });
-
-      // Redirigir a login para que dispare el OTP desde allí
       navigate("/login", { state: { autoOtp: true, email, password } });
     } catch (error: any) {
       const isEmailTaken =
         error?.status === 409 ||
         error?.statusCode === 409 ||
-        error?.message?.includes('EMAIL_ALREADY_EXISTS');
+        error?.message?.includes("EMAIL_ALREADY_EXISTS");
 
       if (isEmailTaken) {
         setShowEmailExistsModal(true);
       } else {
         toast({
           title: "Error en el registro",
-          description: error.message || "No se pudo crear el usuario. Inténtalo de nuevo.",
+          description: error.message || "No se pudo crear el usuario. Intentalo de nuevo.",
           variant: "destructive",
         });
       }
@@ -61,78 +62,70 @@ export default function Register() {
     }
   };
 
-  /* ─── OTP Success ────────────────────────────────────────── */
   const handleOtpVerifySuccess = async (accessToken: string) => {
     try {
       const user = await authService.getProfile(accessToken);
       setAuthData(user, accessToken);
       setShowOtpDialog(false);
-      // Redirigir a login con indicador de registro exitoso
       navigate("/login", { state: { registered: true, email } });
     } catch {
       toast({
         title: "Error",
-        description: "No se pudo obtener la información del usuario",
+        description: "No se pudo obtener la informacion del usuario.",
         variant: "destructive",
       });
     }
   };
 
-  /* ─── Render ─────────────────────────────────────────────── */
   return (
     <>
       <div className="min-h-screen flex bg-background animate-fade-in">
-        {/* Left panel — decorative */}
         <div
-          className="hidden lg:flex flex-col justify-between w-1/2 p-12 relative overflow-hidden animate-fade-in-up [animation-delay:80ms] [animation-fill-mode:both]"
+          className="hidden lg:flex w-1/2 flex-col justify-between overflow-hidden p-12 relative animate-fade-in-up [animation-delay:80ms] [animation-fill-mode:both]"
           style={{
-            background:
-              "linear-gradient(135deg, hsl(var(--accent) / 0.12) 0%, hsl(var(--primary) / 0.08) 100%)",
+            background: "linear-gradient(135deg, hsl(var(--accent) / 0.12) 0%, hsl(var(--primary) / 0.08) 100%)",
           }}
         >
-          {/* Gradient orbs */}
           <div
-            className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-20 blur-3xl"
+            className="absolute -top-32 -right-32 h-96 w-96 rounded-full opacity-20 blur-3xl"
             style={{ background: "hsl(var(--accent))" }}
           />
           <div
-            className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full opacity-15 blur-3xl"
+            className="absolute -bottom-32 -left-32 h-96 w-96 rounded-full opacity-15 blur-3xl"
             style={{ background: "hsl(var(--primary))" }}
           />
 
-          {/* Logo */}
           <div className="relative z-10">
             <Link to="/" className="inline-flex items-center gap-2">
               <img src="/logo.png" alt="Jall AI" className="h-10 w-auto" />
             </Link>
           </div>
 
-          {/* Feature list */}
           <div className="relative z-10">
-            <h2 className="text-4xl font-bold text-foreground leading-tight mb-6">
-              Únete a miles de<br />
+            <h2 className="mb-6 text-4xl font-bold leading-tight text-foreground">
+              Unete a miles de
+              <br />
               usuarios de <span className="text-primary">JallAI</span>
             </h2>
             <ul className="space-y-3">
               {[
-                "Acceso a múltiples modelos de IA",
-                "Gestión de ordenes en tiempo real",
+                "Acceso a multiples modelos de IA",
+                "Gestion de ordenes en tiempo real",
                 "Panel de control personalizado",
-              ].map((feat) => (
-                <li key={feat} className="flex items-center gap-3">
+              ].map((feature) => (
+                <li key={feature} className="flex items-center gap-3">
                   <span
-                    className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs"
+                    className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs"
                     style={{ background: "hsl(var(--primary) / 0.15)", color: "hsl(var(--primary))" }}
                   >
-                    ✓
+                    +
                   </span>
-                  <span className="text-muted-foreground text-sm">{feat}</span>
+                  <span className="text-sm text-muted-foreground">{feature}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Bottom decoration */}
           <div className="relative z-10 flex gap-2">
             {[0, 1, 2].map((i) => (
               <div
@@ -147,52 +140,60 @@ export default function Register() {
           </div>
         </div>
 
-        {/* Right panel — form */}
-        <div className="flex-1 flex items-center justify-center p-6 lg:p-12 animate-fade-in-up [animation-delay:140ms] [animation-fill-mode:both]">
+        <div className="flex flex-1 items-center justify-center p-6 lg:p-12 animate-fade-in-up [animation-delay:140ms] [animation-fill-mode:both]">
           <div className="w-full max-w-md">
-            {/* Mobile logo */}
-            <div className="lg:hidden mb-8">
+            <div className="mb-8 lg:hidden">
               <Link to="/" className="inline-flex items-center gap-2">
                 <img src="/logo.png" alt="Jall AI" className="h-10 w-auto" />
               </Link>
             </div>
 
-            {/* Header */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                Crear cuenta
-              </h1>
+              <h1 className="mb-2 text-3xl font-bold text-foreground">Crear cuenta</h1>
               <p className="text-muted-foreground">
-                ¿Ya tienes cuenta?{" "}
+                Ya tienes cuenta?{" "}
                 <Link
                   to="/login"
-                  className="text-primary font-medium hover:underline underline-offset-4 transition-colors"
+                  className="font-medium text-primary transition-colors hover:underline underline-offset-4"
                 >
-                  Inicia sesión
+                  Inicia sesion
                 </Link>
               </p>
             </div>
 
-            {/* Divider */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-background px-3 text-muted-foreground">
-                  o continúa con tu email
-                </span>
-              </div>
-            </div>
+            {isGoogleAuthEnabled && (
+              <>
+                <GoogleSignInButton
+                  disabled={isLoading}
+                  mode="signup"
+                  onStart={() => setIsGoogleLoading(true)}
+                  onSettled={() => setIsGoogleLoading(false)}
+                  onAuthenticated={(user, accessToken) => {
+                    setAuthData(user, accessToken);
+                    toast({
+                      title: "Bienvenido",
+                      description: `Hola ${user.name || user.email}`,
+                    });
+                    navigate("/dashboard", { replace: true });
+                  }}
+                />
 
-            {/* Form */}
+                <div className="relative mb-6 mt-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-background px-3 text-muted-foreground">
+                      o continua con tu email
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Name */}
               <div>
-                <label
-                  htmlFor="register-name"
-                  className="block text-sm font-medium text-foreground mb-1.5"
-                >
+                <label htmlFor="register-name" className="mb-1.5 block text-sm font-medium text-foreground">
                   Nombre completo
                 </label>
                 <input
@@ -202,17 +203,13 @@ export default function Register() {
                   placeholder="Tu nombre"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground/60 text-sm outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all duration-200"
+                  className="w-full rounded-2xl border border-border bg-secondary/50 px-4 py-3 text-sm text-foreground outline-none transition-all duration-200 placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/40"
                 />
               </div>
 
-              {/* Email */}
               <div>
-                <label
-                  htmlFor="register-email"
-                  className="block text-sm font-medium text-foreground mb-1.5"
-                >
-                  Correo electrónico
+                <label htmlFor="register-email" className="mb-1.5 block text-sm font-medium text-foreground">
+                  Correo electronico
                 </label>
                 <input
                   id="register-email"
@@ -221,39 +218,34 @@ export default function Register() {
                   placeholder="tu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground/60 text-sm outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all duration-200"
+                  className="w-full rounded-2xl border border-border bg-secondary/50 px-4 py-3 text-sm text-foreground outline-none transition-all duration-200 placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/40"
                 />
               </div>
 
-              {/* Password */}
               <div>
-                <label
-                  htmlFor="register-password"
-                  className="block text-sm font-medium text-foreground mb-1.5"
-                >
-                  Contraseña
+                <label htmlFor="register-password" className="mb-1.5 block text-sm font-medium text-foreground">
+                  Contrasena
                 </label>
                 <input
                   id="register-password"
                   type="password"
                   autoComplete="new-password"
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="Minimo 8 caracteres"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl border border-border bg-secondary/50 text-foreground placeholder:text-muted-foreground/60 text-sm outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all duration-200"
+                  className="w-full rounded-2xl border border-border bg-secondary/50 px-4 py-3 text-sm text-foreground outline-none transition-all duration-200 placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/40"
                 />
               </div>
 
-              {/* Submit */}
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full py-3 px-6 rounded-2xl font-semibold text-sm text-primary-foreground transition-all duration-200 hover:opacity-90 hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading || isGoogleLoading}
+                className="w-full rounded-2xl px-6 py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 style={{ background: "hsl(var(--primary))" }}
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-primary-foreground/40 border-t-primary-foreground rounded-full animate-spin" />
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground" />
                     Creando cuenta...
                   </span>
                 ) : (
@@ -264,26 +256,24 @@ export default function Register() {
               <p className="text-center text-xs text-muted-foreground">
                 Al registrarte, aceptas nuestros{" "}
                 <Link to="/terminos" className="text-primary hover:underline underline-offset-2">
-                  Términos de servicio
+                  Terminos de servicio
                 </Link>{" "}
                 y{" "}
                 <Link to="/privacidad" className="text-primary hover:underline underline-offset-2">
-                  Política de privacidad
+                  Politica de privacidad
                 </Link>
               </p>
             </form>
 
-            {/* Back to home */}
             <p className="mt-6 text-center text-xs text-muted-foreground">
-              <Link to="/" className="hover:text-foreground transition-colors">
-                ← Volver al inicio
+              <Link to="/" className="transition-colors hover:text-foreground">
+                Volver al inicio
               </Link>
             </p>
           </div>
         </div>
       </div>
 
-      {/* OTP Dialog */}
       <OtpDialog
         open={showOtpDialog}
         onOpenChange={setShowOtpDialog}
@@ -292,7 +282,6 @@ export default function Register() {
         onVerifySuccess={handleOtpVerifySuccess}
       />
 
-      {/* Modal — Correo ya registrado */}
       {showEmailExistsModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -304,7 +293,6 @@ export default function Register() {
             style={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Ícono */}
             <div
               className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl"
               style={{ background: "hsl(var(--primary) / 0.12)" }}
@@ -325,23 +313,18 @@ export default function Register() {
               </svg>
             </div>
 
-            {/* Texto */}
-            <h2 className="mb-2 text-center text-xl font-bold text-foreground">
-              Correo ya registrado
-            </h2>
-            <p className="mb-6 text-center text-sm text-muted-foreground leading-relaxed">
-              El correo{" "}
-              <span className="font-medium text-foreground">{email}</span> ya
-              tiene una cuenta en JallAI. Inicia sesión para continuar.
+            <h2 className="mb-2 text-center text-xl font-bold text-foreground">Correo ya registrado</h2>
+            <p className="mb-6 text-center text-sm leading-relaxed text-muted-foreground">
+              El correo <span className="font-medium text-foreground">{email}</span> ya tiene una cuenta en JallAI.
+              Inicia sesion para continuar.
             </p>
 
-            {/* Botones */}
             <button
               onClick={() => navigate("/login")}
               className="mb-3 w-full rounded-2xl py-3 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 hover:shadow-lg active:scale-[0.98]"
               style={{ background: "hsl(var(--primary))" }}
             >
-              Ir a iniciar sesión
+              Ir a iniciar sesion
             </button>
             <button
               onClick={() => setShowEmailExistsModal(false)}

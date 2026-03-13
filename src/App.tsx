@@ -2,26 +2,27 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Accounts from "./pages/Accounts";
 import Comprar from "./pages/Comprar";
 import Dashboard from "./pages/Dashboard";
-import Accounts from "./pages/Accounts";
+import Index from "./pages/Index";
+import Login from "./pages/Login";
 import MyOrders from "./pages/MyOrders";
 import NotFound from "./pages/NotFound";
-import TermsOfService from "./pages/legal/TermsOfService";
+import Recovery from "./pages/Recovery";
+import Register from "./pages/Register";
+import ResetPassword from "./pages/ResetPassword";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
 import RefundPolicy from "./pages/legal/RefundPolicy";
-import Recovery from "./pages/Recovery";
-import ResetPassword from "./pages/ResetPassword";
+import TermsOfService from "./pages/legal/TermsOfService";
 
 const queryClient = new QueryClient();
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -47,9 +48,9 @@ const AnimatedRoutes = () => {
   );
 };
 
-const App = () => (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+const AppContent = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <LanguageProvider>
         <AuthProvider>
           <TooltipProvider>
@@ -61,8 +62,20 @@ const App = () => (
           </TooltipProvider>
         </AuthProvider>
       </LanguageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
 );
+
+const App = () => {
+  if (!googleClientId) {
+    return <AppContent />;
+  }
+
+  return (
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <AppContent />
+    </GoogleOAuthProvider>
+  );
+};
 
 export default App;
