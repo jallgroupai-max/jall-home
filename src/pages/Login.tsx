@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth.service";
+import { analyticsService } from "@/lib/analytics.service";
 import { clearRememberedAuth, getRememberedAuth, saveRememberedAuth } from "@/lib/remembered-auth";
 
 const isGoogleAuthEnabled = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
@@ -75,6 +76,11 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    void analyticsService.trackHomeLoginClick({
+      email,
+      route: window.location.pathname || "/login",
+      source: "home-login-page",
+    });
 
     if (!email.trim() || !password.trim()) {
       toast({
