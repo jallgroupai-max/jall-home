@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -27,6 +27,7 @@ import {
   Play,
   Plus,
   Sparkles,
+  WrenchIcon,
   Zap,
 } from "lucide-react";
 
@@ -125,6 +126,7 @@ const Dashboard = () => {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [userAccounts, setUserAccounts] = useState<UserAccount[]>([]);
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
+  const prevProvidersRef = useRef<Provider[]>([]);
 
   useEffect(() => {
     if (!loading && (!user || !token)) {
@@ -140,15 +142,36 @@ const Dashboard = () => {
     }
   }, [location.pathname, location.state, navigate]);
 
+  const fetchProviders = async (showNotifications = false) => {
+    if (!token) return;
+    try {
+      const providersData = await apiService.get<Provider[]>("/providers/find/all", token);
+      if (showNotifications && prevProvidersRef.current.length > 0) {
+        for (const updated of providersData) {
+          const prev = prevProvidersRef.current.find((p) => p.id === updated.id);
+          if (prev && prev.active && !updated.active) {
+            toast({
+              title: `${updated.typeProvider} en mantenimiento`,
+              description: "Estamos trabajando para brindarte el mejor servicio. ¡Volvemos muy pronto! 🛠️",
+              variant: "default",
+              duration: 8000,
+            });
+          }
+        }
+      }
+      prevProvidersRef.current = providersData;
+      setProviders(providersData);
+    } catch (error) {
+      console.error("Failed to fetch providers", error);
+    }
+  };
+
   const fetchInitialData = async () => {
     if (!token) return;
     try {
-      const [providersData, accountsData] = await Promise.all([
-        apiService.get<Provider[]>("/providers/find/all", token),
-        apiService.get<UserAccount[]>("/user-accounts/my-accounts", token),
-      ]);
-      setProviders(providersData);
+      const accountsData = await apiService.get<UserAccount[]>("/user-accounts/my-accounts", token);
       setUserAccounts(accountsData);
+      await fetchProviders(false);
     } catch (error) {
       console.error("Failed to fetch initial data", error);
     }
@@ -194,7 +217,14 @@ const Dashboard = () => {
         fetchUserAccounts();
         fetchPendingOrders();
       }, 10000);
-      return () => clearInterval(interval);
+
+      const providersInterval = setInterval(() => {
+        fetchProviders(true);
+      }, 5000);
+      return () => {
+        clearInterval(interval);
+        clearInterval(providersInterval);
+      };
     }
   }, [showRechargeDialog, token, user]);
 
@@ -315,6 +345,13 @@ const Dashboard = () => {
     return `${hours}h ${minutes}m`;
   };
 
+  const MaintenanceBanner = () => (
+    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400">
+      <WrenchIcon className="w-4 h-4 shrink-0" />
+      <span className="text-xs font-medium">En mantenimiento</span>
+    </div>
+  );
+
   const renderGenerativeCards = (active: boolean) => (
     <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
       <div className="surface-1 rounded-3xl border border-border/60 p-5 animate-fade-in-up [animation-delay:80ms] [animation-fill-mode:both]">
@@ -325,7 +362,9 @@ const Dashboard = () => {
         <p className="text-xs text-muted-foreground mt-1 mb-4">
           {active ? "GPT-4o y herramientas avanzadas" : "Se habilita al activar IA Generativa"}
         </p>
-        {active ? (
+        {chatGPTProvider && !chatGPTProvider.active ? (
+          <MaintenanceBanner />
+        ) : active ? (
           <Button className="w-full rounded-xl" asChild>
             <a href={chatGPTHref} target="_blank" rel="noopener noreferrer">
               {t("dashboard.openChatGPT")}
@@ -346,7 +385,9 @@ const Dashboard = () => {
         <p className="text-xs text-muted-foreground mt-1 mb-4">
           {active ? "Investigacion y respuestas de contexto web" : "Se habilita al activar IA Generativa"}
         </p>
-        {active ? (
+        {grokProvider && !grokProvider.active ? (
+          <MaintenanceBanner />
+        ) : active ? (
           <Button className="w-full rounded-xl" asChild>
             <a href={grokHref} target="_blank" rel="noopener noreferrer">
               {t("dashboard.openGrok")}
@@ -367,7 +408,9 @@ const Dashboard = () => {
         <p className="text-xs text-muted-foreground mt-1 mb-4">
           {active ? "Busqueda web asistida con IA y contexto en tiempo real" : "Se habilita al activar IA Generativa"}
         </p>
-        {active ? (
+        {perplexityProvider && !perplexityProvider.active ? (
+          <MaintenanceBanner />
+        ) : active ? (
           <Button className="w-full rounded-xl" asChild>
             <a href={perplexityHref} target="_blank" rel="noopener noreferrer">
               {t("dashboard.openPerplexity")}
