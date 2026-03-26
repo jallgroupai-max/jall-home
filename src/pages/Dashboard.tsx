@@ -151,9 +151,6 @@ const Dashboard = () => {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [userAccounts, setUserAccounts] = useState<UserAccount[]>([]);
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
-  const [showGuestPromo, setShowGuestPromo] = useState(false);
-  const [showEmailVerificationPromo, setShowEmailVerificationPromo] =
-    useState(false);
   const [emailBannerDismissed, setEmailBannerDismissed] = useState(false);
   const [guestBannerDismissed, setGuestBannerDismissed] = useState(false);
   const [guestLaunchingTool, setGuestLaunchingTool] = useState<string | null>(
@@ -164,6 +161,7 @@ const Dashboard = () => {
     useState(false);
   const [maskedVerificationEmail, setMaskedVerificationEmail] = useState("");
   const prevProvidersRef = useRef<Provider[]>([]);
+  const guestTabInitialized = useRef(false);
   const isGuest = user?.user_type === "guest" || user?.is_guest === true;
   const isEmailVerified = user?.isEmailVerified === true;
   const guestExpiresAt = user?.expiresAt ? new Date(user.expiresAt) : undefined;
@@ -177,20 +175,11 @@ const Dashboard = () => {
   }, [loading, navigate, token, user]);
 
   useEffect(() => {
-    if (isGuest) {
-      setShowGuestPromo(true);
-    } else {
-      setShowGuestPromo(false);
+    if (isGuest && !guestTabInitialized.current) {
+      guestTabInitialized.current = true;
+      setActiveTab("texttools");
     }
   }, [isGuest]);
-
-  useEffect(() => {
-    if (shouldShowEmailVerificationBanner) {
-      setShowEmailVerificationPromo(true);
-    } else {
-      setShowEmailVerificationPromo(false);
-    }
-  }, [shouldShowEmailVerificationBanner]);
 
   useEffect(() => {
     const locationState = location.state as { initialTab?: TabType } | null;
@@ -540,8 +529,22 @@ const Dashboard = () => {
     [userAccounts],
   );
 
+  const activeGemini = useMemo(
+    () =>
+      userAccounts
+        .filter(
+          (ua) => ua.active && ua.account?.provider?.typeProvider === "Gemini",
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime(),
+        )
+        .find((ua) => new Date(ua.expiresAt) > new Date()),
+    [userAccounts],
+  );
+
   const isGenerativeActive =
-    !!activeChatGPT || !!activeGrok || !!activePerplexity;
+    !!activeChatGPT || !!activeGrok || !!activePerplexity || !!activeGemini;
   const chatGPTProvider = providers.find((p) => p.typeProvider === "ChatGPT");
   const grokProvider = providers.find((p) => p.typeProvider === "Grok");
   const perplexityProvider = providers.find(
@@ -571,8 +574,9 @@ const Dashboard = () => {
     accessToken: activePerplexity?.accessToken || sharedAccessToken,
   };
   const geminiAccess: ProviderAccess = {
-    redirectUrl: geminiProvider?.redirectUrl,
-    accessToken: sharedAccessToken,
+    redirectUrl:
+      activeGemini?.account.provider.redirectUrl || geminiProvider?.redirectUrl,
+    accessToken: activeGemini?.accessToken,
   };
 
   const chatGPTHref = buildProviderLaunchUrl(
@@ -770,32 +774,8 @@ const Dashboard = () => {
     </div>
   );
 
-  const GuestPromoModal = () =>
-    showGuestPromo ? (
-      <div
-        className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
-        onClick={() => setShowGuestPromo(false)}
-      >
-        <div className="relative" onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            aria-label="Cerrar banner"
-            onClick={() => setShowGuestPromo(false)}
-            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white shadow-lg transition hover:bg-black/80"
-          >
-            x
-          </button>
-          <img
-            src={guestBannerImage}
-            alt="Confirma tu correo y recibe hasta 60 puntos gratis"
-            className="block max-h-[60vh] w-auto max-w-[360px] rounded-[2rem] object-contain shadow-2xl"
-          />
-        </div>
-      </div>
-    ) : null;
-
   const GuestRegistrationBanner = () => (
-    <div className="fixed bottom-4 left-4 z-40 w-[340px] overflow-hidden rounded-[1.75rem] border border-primary/25 bg-card/95 shadow-2xl backdrop-blur-sm sm:bottom-6 sm:left-6">
+    <div className="w-full sm:fixed sm:bottom-6 sm:left-6 sm:w-[340px] z-40 overflow-hidden rounded-[1.75rem] border border-primary/25 bg-card/95 shadow-2xl backdrop-blur-sm">
       <div className="flex flex-col gap-3 p-5">
         <div className="flex items-start gap-4">
           <img
@@ -845,7 +825,7 @@ const Dashboard = () => {
   );
 
   const EmailVerificationBanner = () => (
-    <div className="fixed bottom-4 left-4 z-40 w-[340px] overflow-hidden rounded-[1.75rem] border border-primary/25 bg-card/95 shadow-2xl backdrop-blur-sm sm:bottom-6 sm:left-6">
+    <div className="w-full sm:fixed sm:bottom-6 sm:left-6 sm:w-[340px] z-40 overflow-hidden rounded-[1.75rem] border border-primary/25 bg-card/95 shadow-2xl backdrop-blur-sm">
       <div className="flex flex-col gap-3 p-5">
         <div className="flex items-start gap-4">
           <img
@@ -880,37 +860,6 @@ const Dashboard = () => {
       </div>
     </div>
   );
-
-  const EmailVerificationPromoModal = () =>
-    showEmailVerificationPromo ? (
-      <div
-        className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
-        onClick={() => setShowEmailVerificationPromo(false)}
-      >
-        <div className="relative" onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            aria-label="Cerrar banner"
-            onClick={() => setShowEmailVerificationPromo(false)}
-            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/60 text-white shadow-lg transition hover:bg-black/80"
-          >
-            x
-          </button>
-          <button
-            type="button"
-            onClick={handleSendEmailVerificationOtp}
-            disabled={emailVerificationLoading}
-            className="block disabled:cursor-wait"
-          >
-            <img
-              src={emailVerificationModalImage}
-              alt="Verifica tu correo y recibe 60 puntos gratis"
-              className="block max-h-[60vh] w-auto max-w-[360px] rounded-[2rem] object-contain shadow-2xl"
-            />
-          </button>
-        </div>
-      </div>
-    ) : null;
 
   const renderContent = () => {
     if (activeTab === "inicio") {
@@ -1173,8 +1122,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <GuestPromoModal />
-      <EmailVerificationPromoModal />
       <DashboardNavbar
         tabs={tabs}
         activeTabId={activeTab}
