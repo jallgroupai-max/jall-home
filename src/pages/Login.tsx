@@ -2,13 +2,18 @@ import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { GuestAccessButton } from "@/components/auth/GuestAccessButton";
 import OtpDialog from "@/components/landing/OtpDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { authService } from "@/lib/auth.service";
 import { analyticsService } from "@/lib/analytics.service";
-import { clearRememberedAuth, getRememberedAuth, saveRememberedAuth } from "@/lib/remembered-auth";
+import {
+  clearRememberedAuth,
+  getRememberedAuth,
+  saveRememberedAuth,
+} from "@/lib/remembered-auth";
 
 const isGoogleAuthEnabled = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
 
@@ -23,10 +28,22 @@ export default function Login() {
   const [maskedEmail, setMaskedEmail] = useState("");
 
   const { setAuthData } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const guestCopy =
+    language === "es"
+      ? {
+          cta: "Entrar como invitado",
+          desc: "Explora el panel por 5 minutos antes de registrarte.",
+          pending: "Abriendo acceso...",
+        }
+      : {
+          cta: "Try guest access",
+          desc: "Explore the dashboard for 5 minutes before signing up.",
+          pending: "Opening access...",
+        };
 
   useEffect(() => {
     const rememberedAuth = getRememberedAuth();
@@ -68,7 +85,8 @@ export default function Login() {
 
       toast({
         title: "Cuenta creada exitosamente",
-        description: "Tu correo fue verificado. Inicia sesion para continuar.",
+        description:
+          "Tu cuenta fue creada. Inicia sesion y verifica tu correo desde el banner del panel.",
       });
       window.history.replaceState({}, document.title);
     }
@@ -172,7 +190,8 @@ export default function Login() {
         <div
           className="hidden lg:flex w-1/2 flex-col justify-between overflow-hidden p-12 relative animate-fade-in-up [animation-delay:80ms] [animation-fill-mode:both]"
           style={{
-            background: "linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--primary) / 0.05) 100%)",
+            background:
+              "linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--primary) / 0.05) 100%)",
           }}
         >
           <div
@@ -208,7 +227,8 @@ export default function Login() {
                 className="h-1 rounded-full"
                 style={{
                   width: i === 0 ? "2rem" : "0.5rem",
-                  background: i === 0 ? "hsl(var(--primary))" : "hsl(var(--border))",
+                  background:
+                    i === 0 ? "hsl(var(--primary))" : "hsl(var(--border))",
                 }}
               />
             ))}
@@ -224,7 +244,9 @@ export default function Login() {
             </div>
 
             <div className="mb-8">
-              <h1 className="mb-2 text-3xl font-bold text-foreground">Iniciar sesion</h1>
+              <h1 className="mb-2 text-3xl font-bold text-foreground">
+                Iniciar sesion
+              </h1>
               <p className="text-muted-foreground">
                 No tienes cuenta?{" "}
                 <Link
@@ -234,6 +256,22 @@ export default function Login() {
                   Registrate gratis
                 </Link>
               </p>
+            </div>
+
+            <div className="mb-6 rounded-3xl border border-primary/20 bg-primary/5 p-4">
+              <p className="text-sm font-semibold text-foreground">
+                {guestCopy.cta}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {guestCopy.desc}
+              </p>
+              <GuestAccessButton
+                label={guestCopy.cta}
+                pendingLabel={guestCopy.pending}
+                variant="outline"
+                size="sm"
+                className="mt-3 w-full rounded-2xl border-primary/30"
+              />
             </div>
 
             {isGoogleAuthEnabled && (
@@ -268,7 +306,10 @@ export default function Login() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="relative">
-                <label htmlFor="login-email" className="mb-1.5 block text-sm font-medium text-foreground">
+                <label
+                  htmlFor="login-email"
+                  className="mb-1.5 block text-sm font-medium text-foreground"
+                >
                   Correo electronico
                 </label>
                 <input
@@ -284,7 +325,10 @@ export default function Login() {
 
               <div className="relative">
                 <div className="mb-1.5 flex items-center justify-between">
-                  <label htmlFor="login-password" className="block text-sm font-medium text-foreground">
+                  <label
+                    htmlFor="login-password"
+                    className="block text-sm font-medium text-foreground"
+                  >
                     Contrasena
                   </label>
                   <Link
@@ -305,11 +349,17 @@ export default function Login() {
                 />
                 <button
                   type="button"
-                  aria-label={showPassword ? "Ocultar contrasena" : "Mostrar contrasena"}
+                  aria-label={
+                    showPassword ? "Ocultar contrasena" : "Mostrar contrasena"
+                  }
                   onClick={() => setShowPassword((value) => !value)}
                   className="absolute right-4 top-[2.65rem] text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
 
