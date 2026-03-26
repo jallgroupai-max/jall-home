@@ -547,6 +547,7 @@ const Dashboard = () => {
   const perplexityProvider = providers.find(
     (p) => p.typeProvider === "Perplexity",
   );
+  const geminiProvider = providers.find((p) => p.typeProvider === "Gemini");
   const sharedAccessToken =
     activePerplexity?.accessToken ||
     activeGrok?.accessToken ||
@@ -569,6 +570,10 @@ const Dashboard = () => {
       perplexityProvider?.redirectUrl,
     accessToken: activePerplexity?.accessToken || sharedAccessToken,
   };
+  const geminiAccess: ProviderAccess = {
+    redirectUrl: geminiProvider?.redirectUrl,
+    accessToken: sharedAccessToken,
+  };
 
   const chatGPTHref = buildProviderLaunchUrl(
     "ChatGPT",
@@ -584,6 +589,11 @@ const Dashboard = () => {
     "Perplexity",
     sharedAccessToken,
     perplexityAccess.redirectUrl,
+  );
+  const geminiHref = buildProviderLaunchUrl(
+    "Gemini",
+    geminiAccess.accessToken,
+    geminiAccess.redirectUrl,
   );
 
   const latestExpiration = [
@@ -732,9 +742,30 @@ const Dashboard = () => {
         <p className="text-xs text-muted-foreground mt-1 mb-4">
           Asistente multimodal de Google
         </p>
-        <Button variant="outline" className="w-full rounded-xl" disabled>
-          {t("dashboard.comingSoon")}
-        </Button>
+        {geminiProvider && !geminiProvider.active ? (
+          <MaintenanceBanner />
+        ) : active ? (
+          <Button className="w-full rounded-xl" asChild>
+            <a href={geminiHref} target="_blank" rel="noopener noreferrer">
+              {t("dashboard.openGemini")}
+            </a>
+          </Button>
+        ) : guestMode && geminiProvider?.active ? (
+          <Button
+            variant="outline"
+            className="w-full rounded-xl"
+            onClick={() => openGuestProvider("Gemini")}
+            disabled={guestLaunchingTool === "Gemini"}
+          >
+            {guestLaunchingTool === "Gemini"
+              ? "Abriendo..."
+              : "Entrar como invitado"}
+          </Button>
+        ) : (
+          <Button variant="outline" className="w-full rounded-xl" disabled>
+            Activar para usar
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -969,9 +1000,9 @@ const Dashboard = () => {
                 Usa IA generativa durante tu sesion invitado
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Puedes abrir ChatGPT, Grok y Perplexity con un token temporal
-                unico para tu sesion. Registra tu cuenta para conservar acceso y
-                desbloquear beneficios.
+                Puedes abrir ChatGPT, Grok, Perplexity y Gemini con un token
+                temporal unico para tu sesion. Registra tu cuenta para
+                conservar acceso y desbloquear beneficios.
               </p>
             </div>
             {renderGenerativeCards(false, true)}
