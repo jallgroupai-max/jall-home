@@ -21,12 +21,12 @@ interface OtpDialogProps {
   onVerifySuccess: (accessToken: string, expiresAt: string) => void;
 }
 
-const OtpDialog = ({ 
-  open, 
-  onOpenChange, 
-  email, 
+const OtpDialog = ({
+  open,
+  onOpenChange,
+  email,
   maskedEmail,
-  onVerifySuccess 
+  onVerifySuccess,
 }: OtpDialogProps) => {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +47,8 @@ const OtpDialog = ({
           clearInterval(timer);
           toast({
             title: "Código expirado",
-            description: "El código OTP ha expirado. Por favor, inicia sesión nuevamente.",
+            description:
+              "El código OTP ha expirado. Por favor, inicia sesión nuevamente.",
             variant: "destructive",
           });
           onOpenChange(false);
@@ -63,12 +64,12 @@ const OtpDialog = ({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!otp.trim() || otp.length !== 6) {
       toast({
         title: "Código inválido",
@@ -79,23 +80,26 @@ const OtpDialog = ({
     }
 
     setIsLoading(true);
-    
+
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/auth/verify/otp`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/auth/verify/otp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            code: parseInt(otp),
+            email: email,
+          }),
         },
-        body: JSON.stringify({
-          code: parseInt(otp),
-          email: email,
-        }),
-      });
+      );
 
       const data = await response.json();
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.message || 'Código OTP inválido');
+        throw new Error(data.message || "Código OTP inválido");
       }
 
       toast({
@@ -108,7 +112,8 @@ const OtpDialog = ({
     } catch (error: any) {
       toast({
         title: "Error de verificación",
-        description: error.message || "El código OTP es inválido o ha expirado.",
+        description:
+          error.message || "El código OTP es inválido o ha expirado.",
         variant: "destructive",
       });
     } finally {
@@ -118,7 +123,7 @@ const OtpDialog = ({
 
   const handleOtpChange = (value: string) => {
     // Only allow numbers and max 6 digits
-    const numericValue = value.replace(/\D/g, '').slice(0, 6);
+    const numericValue = value.replace(/\D/g, "").slice(0, 6);
     setOtp(numericValue);
   };
 
@@ -130,9 +135,10 @@ const OtpDialog = ({
             Verificación de correo
           </DialogTitle>
           <DialogDescription className="text-center">
-             Verifica tu correo y recibe de regalo <br/> 150 créditos <Coins className="w-5 h-5 text-accent inline" /> 
-             <br/>  
-             <br/>
+            Verifica tu correo y recibe de regalo <br /> 30 puntos extra{" "}
+            <Coins className="w-5 h-5 text-accent inline" />
+            <br />
+            <br />
             <strong className="text-primary mt-4">{maskedEmail}</strong>
           </DialogDescription>
         </DialogHeader>
@@ -151,17 +157,25 @@ const OtpDialog = ({
               autoFocus
             />
           </div>
-          
+
           <div className="text-center text-sm text-muted-foreground">
-            Tiempo restante: <span className="font-semibold text-primary">{formatTime(timeLeft)}</span>
+            Tiempo restante:{" "}
+            <span className="font-semibold text-primary">
+              {formatTime(timeLeft)}
+            </span>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading || otp.length !== 6}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading || otp.length !== 6}
+          >
             {isLoading ? "Verificando..." : "Verificar código"}
           </Button>
 
           <p className="text-center text-xs text-muted-foreground">
-            ¿No recibiste el código? Revisa tu carpeta de spam o inicia sesión nuevamente.
+            ¿No recibiste el código? Revisa tu carpeta de spam o inicia sesión
+            nuevamente.
           </p>
         </form>
       </DialogContent>
