@@ -2,6 +2,7 @@ const DEFAULT_PROVIDER_REDIRECTS: Record<string, string> = {
   ChatGPT: "https://gpt.jall.lat",
   Grok: "https://grokia.jall.lat",
   Perplexity: "https://perplexityai.jall.lat",
+  Gemini: "https://geminiai.jall.lat",
 };
 
 export function buildProviderLaunchUrl(providerType: string, accessToken?: string, redirectUrl?: string) {
