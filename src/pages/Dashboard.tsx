@@ -554,7 +554,8 @@ const Dashboard = () => {
   const sharedAccessToken =
     activePerplexity?.accessToken ||
     activeGrok?.accessToken ||
-    activeChatGPT?.accessToken;
+    activeChatGPT?.accessToken ||
+    activeGemini?.accessToken;
 
   const chatGPTAccess: ProviderAccess = {
     redirectUrl:
@@ -596,7 +597,7 @@ const Dashboard = () => {
   );
   const geminiHref = buildProviderLaunchUrl(
     "Gemini",
-    geminiAccess.accessToken,
+    geminiAccess.accessToken || sharedAccessToken,
     geminiAccess.redirectUrl,
   );
 
