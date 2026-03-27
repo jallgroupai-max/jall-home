@@ -72,4 +72,7 @@ jobs:
             echo "🏗️ Construyendo el proyecto..."
             pnpm run build
             
+            echo "🔄 Recargando nginx para aplicar headers de caché..."
+            sudo nginx -t && sudo nginx -s reload || echo "⚠️ No se pudo recargar nginx. Asegúrate de que el usuario SSH tenga permisos sudo para nginx."
+
             echo "✅ ¡Despliegue de $BRANCH finalizado con éxito!"
